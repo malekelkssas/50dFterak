@@ -15,6 +15,7 @@ import { useColorScheme } from 'nativewind';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Text } from '@/components/ui';
+import { statusBarColors, SCHEME_DARK } from '@/utils/constants';
 
 function App() {
   return (
@@ -28,13 +29,13 @@ function App() {
 
 function AppShell() {
   const { colorScheme } = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
+  const isDarkMode = colorScheme === SCHEME_DARK;
 
   return (
     <>
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={isDarkMode ? '#0a0a0a' : '#ffffff'}
+        backgroundColor={isDarkMode ? statusBarColors.dark : statusBarColors.light}
       />
       <SafeAreaView className="flex-1 bg-background">
         <AppContent />
