@@ -1,20 +1,18 @@
 /**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
  * @format
  */
 
+import 'react-native-gesture-handler';
 import "./global.css";
-import { StatusBar, View } from 'react-native';
+import { StatusBar } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
 import {
   SafeAreaProvider,
   SafeAreaView,
 } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
 import { ThemeProvider } from '@/components/ThemeProvider';
-import { ThemeToggle } from '@/components/ThemeToggle';
-import { Text } from '@/components/ui';
+import { AppNavigator } from '@/navigation';
 import { statusBarColors, SCHEME_DARK } from '@/utils/constants';
 
 function App() {
@@ -38,23 +36,11 @@ function AppShell() {
         backgroundColor={isDarkMode ? statusBarColors.dark : statusBarColors.light}
       />
       <SafeAreaView className="flex-1 bg-background">
-        <AppContent />
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>
       </SafeAreaView>
     </>
-  );
-}
-
-function AppContent() {
-  return (
-    <View className="flex-1 bg-background items-center justify-center">
-      <Text variant="headlineSmall" className="mb-2">
-        Fterak50d
-      </Text>
-      <Text variant="bodyMedium" className="text-secondary mb-8">
-        Choose your theme
-      </Text>
-      <ThemeToggle />
-    </View>
   );
 }
 

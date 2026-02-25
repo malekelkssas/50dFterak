@@ -229,6 +229,62 @@ No `dark:` prefix needed — tokens auto-switch:
 
 ---
 
+## Navigation
+
+> Full navigation reference: [navigation-setup.md](./navigation-setup.md)
+
+Uses [React Navigation](https://reactnavigation.org/) native stack with full TypeScript support.
+
+### Structure
+
+```
+navigation/AppNavigator.tsx   ← Stack navigator
+screens/HomeScreen.tsx        ← Screen components
+utils/constants/navigation.ts ← SCREENS object
+utils/types/navigation.ts     ← RootStackParamList
+utils/helpers/navigation.ts   ← buildRoute(), buildDeepLink()
+```
+
+### Screen Names
+
+All screen names live in a single `SCREENS` constant object:
+
+```ts
+import { SCREENS } from '@/utils/constants';
+
+SCREENS.HOME     // 'Home'
+// SCREENS.PROFILE  // 'Profile' (add as needed)
+```
+
+### Navigating
+
+```tsx
+import { useNavigation } from '@react-navigation/native';
+import type { AppNavigationProp } from '@/utils/types';
+import { SCREENS } from '@/utils/constants';
+
+const navigation = useNavigation<AppNavigationProp<'Home'>>();
+navigation.navigate(SCREENS.PROFILE, { userId: '123' });
+```
+
+### Dynamic Routes
+
+```tsx
+import { buildRoute, buildDeepLink } from '@/utils/helpers';
+
+buildRoute('Profile', { userId: '123' })    // => { screen, params }
+buildDeepLink('Profile', { userId: '123' }) // => '/Profile/123'
+```
+
+### Adding a New Screen
+
+1. Add to `SCREENS` in `utils/constants/navigation.ts`
+2. Add params to `RootStackParamList` in `utils/types/navigation.ts`
+3. Create component in `screens/`
+4. Register in `navigation/AppNavigator.tsx`
+
+---
+
 ## Useful Commands
 
 ```bash
@@ -246,6 +302,7 @@ sudo archlinux-java set java-17-openjdk
 
 ## References
 
+- [React Navigation Docs](https://reactnavigation.org/docs/getting-started)
 - [NativeWind Docs (Frameworkless)](https://www.nativewind.dev/docs/getting-started/installation/frameworkless)
 - [NativeWind Themes Guide](https://www.nativewind.dev/docs/guides/themes)
 - [NativeWind Dark Mode](https://www.nativewind.dev/docs/core-concepts/dark-mode)
