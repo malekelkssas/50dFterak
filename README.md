@@ -1,97 +1,252 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Fterak50d
 
-# Getting Started
+A React Native app with NativeWind (Tailwind CSS) and dynamic light/dark theming.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Quick Start
 
-## Step 1: Start Metro
+```bash
+# Install dependencies
+pnpm install
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+# Start Metro bundler
+pnpm start
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+# Build & install debug APK
+pnpm android:build-debug
+pnpm android:install-debug
 
-```sh
-# Using npm
-npm start
-
-# OR using Yarn
-yarn start
+# Reconnect Metro to device
+pnpm adb:reconnect
 ```
 
-## Step 2: Build and run your app
+## Available Scripts
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+| Script | Description |
+|---|---|
+| `pnpm start` | Start Metro bundler |
+| `pnpm android` | Build & run on Android |
+| `pnpm android:clean` | Clean Android build |
+| `pnpm android:build-debug` | Build debug APK |
+| `pnpm android:build-release` | Build release APK |
+| `pnpm android:install-debug` | Install debug APK via ADB |
+| `pnpm android:install-release` | Install release APK via ADB |
+| `pnpm adb:reconnect` | Reconnect Metro to device (`adb reverse`) |
+| `pnpm ios` | Build & run on iOS |
+| `pnpm lint` | Run ESLint |
+| `pnpm test` | Run tests |
 
-### Android
+---
 
-```sh
-# Using npm
-npm run android
+## Project Setup Guide
 
-# OR using Yarn
-yarn android
+> Full setup reference: [react-native-setup-notes.md](./react-native-setup-notes.md)
+
+### 1. Project Initialization
+
+```bash
+npx @react-native-community/cli@latest init <project-name>
 ```
 
-### iOS
+### 2. Core Dependencies
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+```bash
+# NativeWind + supporting libs
+pnpm add nativewind react-native-reanimated react-native-safe-area-context react-native-worklets
+pnpm add --save-dev tailwindcss@^3.4.17 prettier-plugin-tailwindcss@^0.5.11
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
-bundle install
+# Path alias support
+pnpm add -D babel-plugin-module-resolver
 ```
 
-Then, and every time you update your native dependencies, run:
+> **Note:** If you encounter issues with nested packages, use:
+> ```bash
+> pnpm install --shamefully-hoist
+> ```
 
-```sh
-bundle exec pod install
+### 3. Configuration Files
+
+**Initialize Tailwind:**
+```bash
+npx tailwindcss init
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+**`tailwind.config.js`** — see [Theme Setup](#theme-setup) below for the full config with theme colors.
 
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+**`babel.config.js`:**
+```js
+module.exports = {
+  presets: ['module:@react-native/babel-preset', 'nativewind/babel'],
+  plugins: [
+    ['module-resolver', { root: ['.'], alias: { '@': '.' } }],
+  ],
+};
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+**`metro.config.js`:**
+```js
+const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+const { withNativeWind } = require("nativewind/metro");
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+const config = mergeConfig(getDefaultConfig(__dirname), {});
+module.exports = withNativeWind(config, { input: "./global.css" });
+```
 
-## Step 3: Modify your app
+**`tsconfig.json`** — add path aliases:
+```json
+"baseUrl": ".",
+"paths": { "@/*": ["./*"] }
+```
 
-Now that you have successfully run the app, let's make changes!
+### 4. Required Files
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+**`global.css`:**
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+**`nativewind-env.d.ts`:**
+```ts
+/// <reference types="nativewind/types" />
+```
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+Then import `global.css` at the top of `App.tsx`:
+```ts
+import "./global.css";
+```
 
-## Congratulations! :tada:
+### 5. Android Setup
 
-You've successfully run and modified your React Native App. :partying_face:
+**`android/local.properties`:**
+```
+sdk.dir=/home/<your-username>/Android/Sdk
+```
 
-### Now what?
+> ⚠️ Adding `org.gradle.configuration-cache=true` to `android/gradle.properties` **breaks** the clean build command — avoid it.
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+---
 
-# Troubleshooting
+## Theme Setup
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+> Full theme reference: [theme-setup.md](./theme-setup.md)
 
-# Learn More
+### Architecture
 
-To learn more about React Native, take a look at the following resources:
+> **⚠️ Key Gotcha:** CSS `:root` / `.dark` selectors do NOT work on React Native. They only work on web. On native, you must use NativeWind's `vars()` function via a `ThemeProvider` wrapper.
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+```
+tailwind.config.js  ──→  defines color tokens using CSS vars
+ThemeProvider        ──→  injects variable values via vars() (native)
+ThemeToggle          ──→  toggleColorScheme()
+```
+
+### 1. Color Tokens (`tailwind.config.js`)
+
+```js
+module.exports = {
+  darkMode: "class",
+  // ...
+  theme: {
+    extend: {
+      colors: {
+        background: "rgb(var(--color-background) / <alpha-value>)",
+        foreground: "rgb(var(--color-foreground) / <alpha-value>)",
+        primary: "rgb(var(--color-primary) / <alpha-value>)",
+        secondary: "rgb(var(--color-secondary) / <alpha-value>)",
+        muted: "rgb(var(--color-muted) / <alpha-value>)",
+        accent: "rgb(var(--color-accent) / <alpha-value>)",
+      },
+    },
+  },
+};
+```
+
+### 2. ThemeProvider (`components/ThemeProvider.tsx`)
+
+Uses NativeWind's `vars()` to inject CSS variable values on native:
+
+```tsx
+import { View } from 'react-native';
+import { vars, useColorScheme } from 'nativewind';
+
+const lightTheme = vars({ '--color-background': '255 255 255', /* ... */ });
+const darkTheme = vars({ '--color-background': '10 10 10', /* ... */ });
+
+export function ThemeProvider({ children }) {
+  const { colorScheme } = useColorScheme();
+  return (
+    <View style={colorScheme === 'dark' ? darkTheme : lightTheme} className="flex-1">
+      {children}
+    </View>
+  );
+}
+```
+
+### 3. Wrap App
+
+```tsx
+<SafeAreaProvider>
+  <ThemeProvider>
+    <SafeAreaView className="flex-1 bg-background">
+      {/* all children auto-switch colors */}
+    </SafeAreaView>
+  </ThemeProvider>
+</SafeAreaProvider>
+```
+
+### Color Token Reference
+
+| Token | Class | Light | Dark |
+|---|---|---|---|
+| background | `bg-background` | white | near-black |
+| foreground | `text-foreground` | near-black | near-white |
+| primary | `bg-primary` / `text-primary` | blue-500 | blue-400 |
+| secondary | `text-secondary` | slate-500 | slate-400 |
+| muted | `bg-muted` | slate-100 | slate-800 |
+| accent | `bg-accent` | indigo-500 | indigo-400 |
+
+### Usage
+
+No `dark:` prefix needed — tokens auto-switch:
+
+```tsx
+<View className="bg-background">
+  <Text className="text-foreground">Auto-themed text</Text>
+  <Text className="text-secondary">Subtle text</Text>
+</View>
+```
+
+### Key Considerations
+
+| Topic | Detail |
+|---|---|
+| **Web vs Native** | `global.css` variables work on web; `ThemeProvider` with `vars()` needed on native |
+| **Adding new colors** | Add to 3 places: `tailwind.config.js`, `ThemeProvider`, and `global.css` (web) |
+| **StatusBar** | Handle separately with `barStyle` and `backgroundColor` props |
+| **SafeAreaView** | Use from `react-native-safe-area-context`, not `react-native` (deprecated) |
+| **Metro restart** | Always restart Metro after changing `tailwind.config.js` or `global.css` |
+
+---
+
+## Useful Commands
+
+```bash
+# Reconnect Metro to mobile device
+adb reverse tcp:8081 tcp:8081
+
+# List available Java versions (Arch Linux)
+archlinux-java status
+
+# Switch Java version (Arch Linux)
+sudo archlinux-java set java-17-openjdk
+```
+
+---
+
+## References
+
+- [NativeWind Docs (Frameworkless)](https://www.nativewind.dev/docs/getting-started/installation/frameworkless)
+- [NativeWind Themes Guide](https://www.nativewind.dev/docs/guides/themes)
+- [NativeWind Dark Mode](https://www.nativewind.dev/docs/core-concepts/dark-mode)
+- [React Native Paper](https://oss.callstack.com/react-native-paper/docs/components/Badge)

@@ -6,37 +6,55 @@
  */
 
 import "./global.css";
-import { Text, StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
+import { StatusBar, View } from 'react-native';
 import {
   SafeAreaProvider,
-  useSafeAreaInsets,
+  SafeAreaView,
 } from 'react-native-safe-area-context';
+import { useColorScheme } from 'nativewind';
+import { ThemeProvider } from '@/components/ThemeProvider';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { Text } from '@/components/ui';
 
 function App() {
-  const isDarkMode = useColorScheme() === 'dark';
-
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
+      <ThemeProvider>
+        <AppShell />
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }
 
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
+function AppShell() {
+  const { colorScheme } = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
 
   return (
-    <View style={styles.container}>
-      <Text>AppContent</Text>
-    </View>
+    <>
+      <StatusBar
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        backgroundColor={isDarkMode ? '#0a0a0a' : '#ffffff'}
+      />
+      <SafeAreaView className="flex-1 bg-background">
+        <AppContent />
+      </SafeAreaView>
+    </>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
+function AppContent() {
+  return (
+    <View className="flex-1 bg-background items-center justify-center">
+      <Text variant="headlineSmall" className="mb-2">
+        Fterak50d
+      </Text>
+      <Text variant="bodyMedium" className="text-secondary mb-8">
+        Choose your theme
+      </Text>
+      <ThemeToggle />
+    </View>
+  );
+}
 
 export default App;
