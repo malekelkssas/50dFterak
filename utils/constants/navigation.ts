@@ -6,6 +6,6 @@
  */
 export const SCREENS = {
     HOME: 'Home',
-    // PROFILE: 'Profile',
-    // SETTINGS: 'Settings',
+    INVOICES: 'فواتيري',
+    CUSTOMERS: 'زبايني',
 } as const;

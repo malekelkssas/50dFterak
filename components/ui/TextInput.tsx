@@ -186,14 +186,17 @@ export interface TextInputIconProps {
     icon: React.ReactNode;
     /** Callback when the icon is pressed */
     onPress?: () => void;
+    /** Additional styles for the icon wrapper */
+    style?: StyleProp<ViewStyle>;
 }
 
-function TextInputIcon({ icon, onPress }: TextInputIconProps) {
+function TextInputIcon({ icon, onPress, style }: TextInputIconProps) {
     if (onPress) {
         return (
             <Pressable
                 onPress={onPress}
                 className="p-1"
+                style={style}
                 hitSlop={8}
                 accessibilityRole="button"
             >
@@ -201,7 +204,7 @@ function TextInputIcon({ icon, onPress }: TextInputIconProps) {
             </Pressable>
         );
     }
-    return <View className="p-1">{icon}</View>;
+    return <View className="p-1" style={style}>{icon}</View>;
 }
 
 // ── TextInput.Affix ─────────────────────────────────────────────────────
@@ -209,10 +212,12 @@ function TextInputIcon({ icon, onPress }: TextInputIconProps) {
 export interface TextInputAffixProps {
     /** Text to display as prefix/suffix (e.g. "$", ".com") */
     text: string;
+    /** Custom style for the text */
+    textStyle?: StyleProp<import('react-native').TextStyle>;
 }
 
-function TextInputAffix({ text }: TextInputAffixProps) {
-    return <Text className="text-secondary text-base">{text}</Text>;
+function TextInputAffix({ text, textStyle }: TextInputAffixProps) {
+    return <Text style={textStyle} className="text-secondary text-base">{text}</Text>;
 }
 
 // ── Compose ─────────────────────────────────────────────────────────────

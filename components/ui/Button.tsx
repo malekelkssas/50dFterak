@@ -1,11 +1,11 @@
 import React from 'react';
 import {
     Pressable,
-    ActivityIndicator,
     View,
-    Text,
     type PressableProps,
 } from 'react-native';
+import { Text } from './Text';
+import { ActivityIndicator } from './ActivityIndicator';
 
 export type ButtonMode = 'text' | 'outlined' | 'contained';
 

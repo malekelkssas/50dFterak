@@ -1,4 +1,5 @@
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import type { RouteProp } from '@react-navigation/native';
 
 /**
@@ -8,14 +9,13 @@ import type { RouteProp } from '@react-navigation/native';
  */
 export type RootStackParamList = {
     Home: undefined;
-    // Example future dynamic screens:
-    // Profile: { userId: string };
-    // Settings: undefined;
+    فواتيري: undefined;
+    زبايني: undefined;
 };
 
 /** Typed navigation prop for any screen in the root stack */
 export type AppNavigationProp<T extends keyof RootStackParamList> =
-    NativeStackNavigationProp<RootStackParamList, T>;
+    BottomTabNavigationProp<RootStackParamList, T>;
 
 /** Typed route prop for any screen in the root stack */
 export type AppRouteProp<T extends keyof RootStackParamList> =

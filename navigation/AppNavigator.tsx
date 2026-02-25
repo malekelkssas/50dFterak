@@ -1,22 +1,27 @@
 import React from 'react';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import type { RootStackParamList } from '@/utils/types';
 import { SCREENS } from '@/utils/constants';
 import { HomeScreen } from '@/screens/HomeScreen';
+import { InvoicesScreen } from '@/screens/InvoicesScreen';
+import { CustomersScreen } from '@/screens/CustomersScreen';
+import { BottomNavigation } from '@/components/ui/BottomNavigation';
 
-const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator<RootStackParamList>();
 
 export function AppNavigator() {
     return (
-        <Stack.Navigator
+        <Tab.Navigator
             initialRouteName={SCREENS.HOME}
+            tabBar={(props) => <BottomNavigation {...props} />}
             screenOptions={{
                 headerShown: false,
-                contentStyle: { backgroundColor: 'transparent' },
-                animation: 'slide_from_right',
+                sceneStyle: { backgroundColor: 'transparent' },
             }}
         >
-            <Stack.Screen name={SCREENS.HOME} component={HomeScreen} />
-        </Stack.Navigator>
+            <Tab.Screen name={SCREENS.HOME} component={HomeScreen} />
+            <Tab.Screen name={SCREENS.INVOICES} component={InvoicesScreen} />
+            <Tab.Screen name={SCREENS.CUSTOMERS} component={CustomersScreen} />
+        </Tab.Navigator>
     );
 }
