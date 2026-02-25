@@ -17,6 +17,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from '@/store';
 import { AppNavigator } from '@/navigation';
 import { statusBarColors, SCHEME_DARK } from '@/utils/constants';
+import { PortalHost } from '@/components/ui/Portal';
 
 function App() {
   return (
@@ -24,7 +25,9 @@ function App() {
       <PersistGate loading={null} persistor={persistor}>
         <SafeAreaProvider>
           <ThemeProvider>
-            <AppShell />
+            <PortalHost>
+              <AppShell />
+            </PortalHost>
           </ThemeProvider>
         </SafeAreaProvider>
       </PersistGate>
@@ -39,8 +42,8 @@ function AppShell() {
   return (
     <>
       <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={isDarkMode ? statusBarColors.dark : statusBarColors.light}
+        barStyle={isDarkMode ? 'dark-content' : 'light-content'}
+        backgroundColor={isDarkMode ? statusBarColors.light : statusBarColors.dark}
       />
       <SafeAreaView className="flex-1 bg-background">
         <NavigationContainer>

@@ -13,7 +13,7 @@ export function HomeScreen() {
             {/* Duck Section */}
             <Card mode="contained" className="w-full max-w-sm mt-6 p-4">
                 <Card.Content className="items-center">
-                    <Text className="text-4xl p-4">🦆</Text>
+                    <Text className="text-5xl p-4">🦆</Text>
                     <Text variant="headlineMedium" className="mt-4 font-bold text-center">
                         Quack Quack!
                     </Text>
