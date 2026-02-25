@@ -9,6 +9,7 @@ import { invoiceService, Invoice } from '@/backend';
 import { AddInvoiceModal } from '@/components/invoices/AddInvoiceModal';
 import { EditInvoiceModal } from '@/components/invoices/EditInvoiceModal';
 import { BSON } from 'realm';
+import { formatCurrency } from '@/utils/formatters';
 
 export function InvoicesScreen() {
     const [selectedDate, setSelectedDate] = useState(new Date());
@@ -49,22 +50,22 @@ export function InvoicesScreen() {
         const month = date.getMonth() + 1;
         const day = date.getDate();
 
-        try {
-            // Using a tiny timeout to let the UI update the selected circle and show the indicator
-            // before Realm blocks the JS thread for fetching
-            setTimeout(() => {
+        // Using a tiny timeout to let the UI update the selected circle and show the indicator
+        // before Realm blocks the JS thread for fetching
+        setTimeout(() => {
+            try {
                 const results = invoiceService.getInvoices(year, month, day);
                 const total = invoiceService.getTotalAmountForDate(year, month, day);
 
                 setInvoices(results);
                 setTotalAmount(total);
                 setLoadingInvoices(false);
-            }, 10);
-        } catch (error) {
-            console.error(error);
-            setErrorMsg('فشل في جلب الفواتير');
-            setLoadingInvoices(false);
-        }
+            } catch (error) {
+                console.error(error);
+                setErrorMsg('فشل في جلب الفواتير');
+                setLoadingInvoices(false);
+            }
+        }, 10);
     }, []);
 
     // Initial load and month changes
@@ -141,10 +142,6 @@ export function InvoicesScreen() {
 
     const handleViewDetails = (invoice: Invoice) => {
         setInvoiceDetails(invoice);
-    };
-
-    const formatCurrency = (amount: number) => {
-        return amount.toLocaleString('ar-EG') + ' ج.م';
     };
 
     return (

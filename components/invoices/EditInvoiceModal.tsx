@@ -51,7 +51,7 @@ export function EditInvoiceModal({ visible, onDismiss, invoice, onSuccess }: Edi
             const data: InvoiceUpdateData = {
                 title: title.trim(),
                 price: parsedPrice,
-                description: description.trim() || undefined,
+                description: description.trim(),
                 quantity: isNaN(parsedQuantity) ? 1 : parsedQuantity,
             };
 
@@ -83,7 +83,7 @@ export function EditInvoiceModal({ visible, onDismiss, invoice, onSuccess }: Edi
                     </Text>
 
                     <Text variant="bodyMedium" className="text-secondary mb-6 text-center">
-                        التاريخ: {invoice.createdAt.toLocaleDateString('ar-EG')}
+                        التاريخ: {new Date(invoice.year, invoice.month - 1, invoice.day).toLocaleDateString('ar-EG')}
                     </Text>
 
                     <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">

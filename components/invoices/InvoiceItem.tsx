@@ -12,19 +12,7 @@ interface InvoiceItemProps {
     onViewDetails?: (invoice: Invoice) => void;
 }
 
-/** Format number as currency */
-const formatCurrency = (amount: number) => {
-    return amount.toLocaleString('ar-EG') + ' ج.م';
-};
-
-/** Manually format time to be safe across RN intl implementations */
-const formatTime = (date: Date) => {
-    const hours = date.getHours();
-    const minutes = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes();
-    const ampm = hours >= 12 ? 'م' : 'ص';
-    const displayHours = hours % 12 || 12;
-    return `${displayHours}:${minutes} ${ampm}`;
-};
+import { formatCurrency, formatTime } from '@/utils/formatters';
 
 export function InvoiceItem({ invoice, onDelete, onEdit, onViewDetails }: InvoiceItemProps) {
     return (
