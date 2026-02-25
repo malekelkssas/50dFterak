@@ -37,3 +37,12 @@ export type {
     DialogScrollAreaProps,
     DialogIconProps
 } from './Dialog';
+
+export { Searchbar } from './Searchbar';
+export type { SearchbarProps } from './Searchbar';
+
+export { SegmentedButtons } from './SegmentedButtons';
+export type { SegmentedButtonsProps, SegmentedButtonItem, SegmentedButtonValue } from './SegmentedButtons';
+
+export { Switch } from './Switch';
+export type { SwitchProps } from './Switch';
