@@ -39,7 +39,7 @@ pnpm adb:reconnect
 
 ## Project Setup Guide
 
-> Full setup reference: [react-native-setup-notes.md](./react-native-setup-notes.md)
+> Full setup reference: [react-native-setup-notes.md](./docs/react-native-setup-notes.md)
 
 ### 1. Project Initialization
 
@@ -129,7 +129,7 @@ sdk.dir=/home/<your-username>/Android/Sdk
 
 ## Theme Setup
 
-> Full theme reference: [theme-setup.md](./theme-setup.md)
+> Full theme reference: [theme-setup.md](./docs/theme-setup.md)
 
 ### Architecture
 
@@ -231,7 +231,7 @@ No `dark:` prefix needed — tokens auto-switch:
 
 ## State Management (Redux)
 
-> Full Redux reference: [redux-setup.md](./redux-setup.md)
+> Full Redux reference: [redux-setup.md](./docs/redux-setup.md)
 
 Uses Redux Toolkit, Redux Persist (with AsyncStorage), and state encryption.
 
@@ -252,7 +252,7 @@ To copy your web slices over, just paste them into `store/slices` and register t
 
 ## Environment Variables
 
-> Full Env setup reference: [env-setup.md](./env-setup.md)
+> Full Env setup reference: [env-setup.md](./docs/env-setup.md)
 
 React Native doesn't have a built-in `process.env`. This project uses `react-native-dotenv` to inject variables natively.
 1. Add variables to your `.env` file (e.g. `REDUX_PERSIST_SECRET_KEY=my-secret`)
@@ -265,7 +265,7 @@ React Native doesn't have a built-in `process.env`. This project uses `react-nat
 
 ## Navigation
 
-> Full navigation reference: [navigation-setup.md](./navigation-setup.md)
+> Full navigation reference: [navigation-setup.md](./docs/navigation-setup.md)
 
 Uses [React Navigation](https://reactnavigation.org/) native stack with full TypeScript support.
 
@@ -316,6 +316,14 @@ buildDeepLink('Profile', { userId: '123' }) // => '/Profile/123'
 2. Add params to `RootStackParamList` in `utils/types/navigation.ts`
 3. Create component in `screens/`
 4. Register in `navigation/AppNavigator.tsx`
+
+---
+
+## Realm Schema Migrations
+
+> Full migration guide: [realm-schema-migrations-guide.md](./docs/realm-schema-migrations-guide.md)
+
+Detailed instructions for managing database schema updates, incrementing versions, and handling data transforms.
 
 ---
 
