@@ -12,3 +12,6 @@ export type { TextInputProps, TextInputMode, TextInputIconProps, TextInputAffixP
 
 export { ToggleButton } from './ToggleButton';
 export type { ToggleButtonProps, ToggleButtonGroupProps, ToggleButtonRowProps } from './ToggleButton';
+
+export { Snackbar } from './Snackbar';
+export type { SnackbarProps } from './Snackbar';

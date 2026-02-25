@@ -12,16 +12,23 @@ import {
 } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import { store, persistor } from '@/store';
 import { AppNavigator } from '@/navigation';
 import { statusBarColors, SCHEME_DARK } from '@/utils/constants';
 
 function App() {
   return (
-    <SafeAreaProvider>
-      <ThemeProvider>
-        <AppShell />
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <SafeAreaProvider>
+          <ThemeProvider>
+            <AppShell />
+          </ThemeProvider>
+        </SafeAreaProvider>
+      </PersistGate>
+    </Provider>
   );
 }
 

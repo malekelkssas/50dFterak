@@ -25,11 +25,17 @@ pnpm add --save-dev tailwindcss@^3.4.17 prettier-plugin-tailwindcss@^0.5.11
 pnpm add -D babel-plugin-module-resolver
 ```
 
-> **Note:** If you encounter issues with nested packages, use:
+> **Note:** If you encounter issues with nested packages, you need to hoist all nested packages to the top-level `node_modules`. This fixes errors like `Included build '.../@react-native/gradle-plugin' does not exist.`
+> 
+> You can do this manually per-install:
 > ```bash
 > pnpm install --shamefully-hoist
 > ```
-> This forces all nested packages to be hoisted to the top-level `node_modules` — fixes errors like `Included build '.../@react-native/gradle-plugin' does not exist.`
+> 
+> **Recommended:** Create an `.npmrc` file in your project root to make this the default behavior:
+> ```ini
+> shamefully-hoist=true
+> ```
 
 ---
 

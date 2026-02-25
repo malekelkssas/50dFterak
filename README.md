@@ -229,6 +229,40 @@ No `dark:` prefix needed — tokens auto-switch:
 
 ---
 
+## State Management (Redux)
+
+> Full Redux reference: [redux-setup.md](./redux-setup.md)
+
+Uses Redux Toolkit, Redux Persist (with AsyncStorage), and state encryption.
+
+### Structure
+
+```
+hooks/
+  useStore.ts        ← Typed useAppDispatch / useAppSelector
+store/
+  index.ts           ← Store, Persist, and Encryption config
+  slices/
+    counterSlice.ts  ← Example slice
+```
+
+To copy your web slices over, just paste them into `store/slices` and register them in `store/index.ts`. All thunks and reducers work exactly the same.
+
+---
+
+## Environment Variables
+
+> Full Env setup reference: [env-setup.md](./env-setup.md)
+
+React Native doesn't have a built-in `process.env`. This project uses `react-native-dotenv` to inject variables natively.
+1. Add variables to your `.env` file (e.g. `REDUX_PERSIST_SECRET_KEY=my-secret`)
+2. Add type definitions in `utils/types/env.d.ts` under the `'@env'` module.
+3. Access them securely via the single-source-of-truth export at `utils/constants/env.ts`.
+
+> **Note:** Whenever you change your `.env` file, you **must clear the Metro cache** for it to take effect: `pnpm start --reset-cache`.
+
+---
+
 ## Navigation
 
 > Full navigation reference: [navigation-setup.md](./navigation-setup.md)
