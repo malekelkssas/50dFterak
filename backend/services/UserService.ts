@@ -111,6 +111,29 @@ class UserService {
 
         return user;
     }
+
+    /**
+     * Delete an existing user by its _id, along with all associated orders.
+     */
+    deleteUser(id: BSON.ObjectId | string): void {
+        const realm = getRealm();
+        const objectId =
+            typeof id === 'string' ? new BSON.ObjectId(id) : id;
+
+        const user = realm.objectForPrimaryKey(User, objectId);
+
+        if (!user) {
+            throw new Error(`User with id ${objectId.toHexString()} not found`);
+        }
+
+        // Must delete associated orders first
+        const orders = realm.objects("Order").filtered('user == $0', user);
+
+        realm.write(() => {
+            realm.delete(orders);
+            realm.delete(user);
+        });
+    }
 }
 
 export const userService = UserService.getInstance();

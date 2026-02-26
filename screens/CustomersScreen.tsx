@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, FlatList, Pressable } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Text, SegmentedButtons, Searchbar, Button, ActivityIndicator } from '@/components/ui';
 import { userService } from '@/backend/services/UserService';
 import type { User } from '@/backend/models/User';
@@ -29,13 +29,6 @@ export function CustomersScreen() {
     const isFetchingMoreRef = useRef(false);
     const fetchIdRef = useRef(0);
 
-    // Initial load and search effect
-    useEffect(() => {
-        if (activeTab === CUSTOMER_TABS.CUSTOMERS) {
-            loadInitialUsers();
-        }
-    }, [debouncedSearch, activeTab]);
-
     const loadInitialUsers = useCallback(() => {
         // Increment fetchId so any in-flight loadMoreUsers knows it's stale
         fetchIdRef.current += 1;
@@ -52,6 +45,24 @@ export function CustomersScreen() {
         setNextCursor(cursor);
         setIsLoading(false);
     }, [debouncedSearch]);
+
+    // Initial load and search effect
+    useEffect(() => {
+        if (activeTab === CUSTOMER_TABS.CUSTOMERS) {
+            loadInitialUsers();
+        }
+    }, [debouncedSearch, activeTab, loadInitialUsers]);
+
+    // Handle full refresh when screen gains focus after navigating back (e.g., from Delete)
+    useFocusEffect(
+        useCallback(() => {
+            if (activeTab === CUSTOMER_TABS.CUSTOMERS) {
+                // If it's already loading, do not trigger a conflicting double-load
+                if (isLoading) return;
+                loadInitialUsers();
+            }
+        }, [activeTab, loadInitialUsers, isLoading])
+    );
 
     const loadMoreUsers = useCallback(() => {
         if (!nextCursor || isFetchingMoreRef.current || isLoading) return;
@@ -87,6 +98,8 @@ export function CustomersScreen() {
     };
 
     const renderUser = ({ item }: { item: User }) => {
+        // Guard against invalidated Realm objects (e.g., after deletion on another screen)
+        if (!item.isValid()) return null;
         return (
             <Pressable
                 className="bg-surface p-4 rounded-xl mb-3 shadow-md shadow-black/15 elevation-2 border border-border/50 dark:border-white/10"
