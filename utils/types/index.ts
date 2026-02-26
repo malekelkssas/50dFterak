@@ -1,2 +1,2 @@
 export type { ColorScheme } from './theme';
-export type { RootStackParamList, AppNavigationProp, AppRouteProp } from './navigation';
+export type { RootStackParamList, BottomTabParamList, AppNavigationProp, AppRouteProp, TabNavigationProp } from './navigation';
