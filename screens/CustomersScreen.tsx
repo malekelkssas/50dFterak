@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, FlatList, Pressable } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Text, SegmentedButtons, Searchbar, Button, ActivityIndicator } from '@/components/ui';
@@ -25,6 +25,10 @@ export function CustomersScreen() {
     const [isFetchingMore, setIsFetchingMore] = useState(false);
     const [isAddModalVisible, setIsAddModalVisible] = useState(false);
 
+    // Ref-based guards to avoid stale closure issues
+    const isFetchingMoreRef = useRef(false);
+    const fetchIdRef = useRef(0);
+
     // Initial load and search effect
     useEffect(() => {
         if (activeTab === CUSTOMER_TABS.CUSTOMERS) {
@@ -33,7 +37,12 @@ export function CustomersScreen() {
     }, [debouncedSearch, activeTab]);
 
     const loadInitialUsers = useCallback(() => {
+        // Increment fetchId so any in-flight loadMoreUsers knows it's stale
+        fetchIdRef.current += 1;
+        isFetchingMoreRef.current = false;
+
         setIsLoading(true);
+        setIsFetchingMore(false);
         const { users: newUsers, nextCursor: cursor } = userService.getUsers(
             undefined,
             PAGE_SIZE,
@@ -45,21 +54,30 @@ export function CustomersScreen() {
     }, [debouncedSearch]);
 
     const loadMoreUsers = useCallback(() => {
-        if (!nextCursor || isFetchingMore || isLoading) return;
+        if (!nextCursor || isFetchingMoreRef.current || isLoading) return;
 
+        isFetchingMoreRef.current = true;
         setIsFetchingMore(true);
-        // Add a small delay for smoother UI, or just fetch directly
-        setTimeout(() => {
-            const { users: newUsers, nextCursor: cursor } = userService.getUsers(
-                nextCursor,
-                PAGE_SIZE,
-                debouncedSearch
-            );
-            setUsers((prev) => [...prev, ...newUsers]);
-            setNextCursor(cursor);
+
+        const capturedFetchId = fetchIdRef.current;
+        const { users: newUsers, nextCursor: cursor } = userService.getUsers(
+            nextCursor,
+            PAGE_SIZE,
+            debouncedSearch
+        );
+
+        // Bail out if a new initial load was triggered while we were fetching
+        if (capturedFetchId !== fetchIdRef.current) {
+            isFetchingMoreRef.current = false;
             setIsFetchingMore(false);
-        }, 100);
-    }, [nextCursor, isFetchingMore, isLoading, debouncedSearch]);
+            return;
+        }
+
+        setUsers((prev) => [...prev, ...newUsers]);
+        setNextCursor(cursor);
+        isFetchingMoreRef.current = false;
+        setIsFetchingMore(false);
+    }, [nextCursor, isLoading, debouncedSearch]);
 
     const handleSaveUser = (data: { name: string; phoneNumber: string; flourAmount: number }) => {
         userService.addUser(data);
