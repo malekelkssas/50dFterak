@@ -69,9 +69,13 @@ class OrderService {
     }
 
     /**
-     * Get all orders for a specific user, sorted by createdAt descending.
+     * Get orders for a specific user, sorted by createdAt descending. Supports cursor-based pagination.
      */
-    getOrdersByUser(userId: BSON.ObjectId | string): Order[] {
+    getOrdersByUser(
+        userId: BSON.ObjectId | string,
+        cursor?: Date,
+        limit: number = 20,
+    ): { orders: Order[]; nextCursor: Date | null } {
         const realm = getRealm();
         const objectId =
             typeof userId === 'string' ? new BSON.ObjectId(userId) : userId;
@@ -82,12 +86,24 @@ class OrderService {
             throw new Error(`User with id ${objectId.toHexString()} not found`);
         }
 
-        const results = realm
+        let results = realm
             .objects(Order)
-            .filtered('user == $0', user)
-            .sorted('createdAt', true);
+            .filtered('user == $0', user);
 
-        return [...results];
+        if (cursor) {
+            results = results.filtered('createdAt < $0', cursor);
+        }
+
+        const sorted = results.sorted('createdAt', true);
+
+        const orders = [...sorted.slice(0, limit)];
+
+        const nextCursor =
+            orders.length === limit
+                ? orders[orders.length - 1].createdAt
+                : null;
+
+        return { orders, nextCursor };
     }
 
     /**

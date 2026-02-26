@@ -109,8 +109,7 @@ export const Searchbar = forwardRef<NativeTextInput, SearchbarProps>(
         const hasValue = value.length > 0;
 
         return (
-            <Pressable
-                onPress={onPress}
+            <View
                 style={[
                     styles.container,
                     {
@@ -158,7 +157,7 @@ export const Searchbar = forwardRef<NativeTextInput, SearchbarProps>(
                         {clearIcon || <X size={20} color={defaultIconColor} />}
                     </Pressable>
                 )}
-            </Pressable>
+            </View>
         );
     }
 );

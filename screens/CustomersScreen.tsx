@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, FlatList, Pressable } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Text, SegmentedButtons, Searchbar, Button, ActivityIndicator } from '@/components/ui';
 import { userService } from '@/backend/services/UserService';
 import type { User } from '@/backend/models/User';
@@ -28,13 +28,7 @@ export function CustomersScreen() {
     // Ref-based guards to avoid stale closure issues
     const isFetchingMoreRef = useRef(false);
     const fetchIdRef = useRef(0);
-
-    // Initial load and search effect
-    useEffect(() => {
-        if (activeTab === CUSTOMER_TABS.CUSTOMERS) {
-            loadInitialUsers();
-        }
-    }, [debouncedSearch, activeTab]);
+    const hasMountedRef = useRef(false);
 
     const loadInitialUsers = useCallback(() => {
         // Increment fetchId so any in-flight loadMoreUsers knows it's stale
@@ -52,6 +46,26 @@ export function CustomersScreen() {
         setNextCursor(cursor);
         setIsLoading(false);
     }, [debouncedSearch]);
+
+    // Initial load and search/tab changes
+    useEffect(() => {
+        if (activeTab === CUSTOMER_TABS.CUSTOMERS) {
+            loadInitialUsers();
+        }
+    }, [debouncedSearch, activeTab, loadInitialUsers]);
+
+    // Refresh data only when screen regains focus (not on initial mount)
+    useFocusEffect(
+        useCallback(() => {
+            if (!hasMountedRef.current) {
+                hasMountedRef.current = true;
+                return;
+            }
+            if (activeTab === CUSTOMER_TABS.CUSTOMERS) {
+                loadInitialUsers();
+            }
+        }, [activeTab, debouncedSearch]) // eslint-disable-line react-hooks/exhaustive-deps
+    );
 
     const loadMoreUsers = useCallback(() => {
         if (!nextCursor || isFetchingMoreRef.current || isLoading) return;
@@ -87,6 +101,8 @@ export function CustomersScreen() {
     };
 
     const renderUser = ({ item }: { item: User }) => {
+        // Guard against invalidated Realm objects (e.g., after deletion on another screen)
+        if (!item.isValid()) return null;
         return (
             <Pressable
                 className="bg-surface p-4 rounded-xl mb-3 shadow-md shadow-black/15 elevation-2 border border-border/50 dark:border-white/10"
