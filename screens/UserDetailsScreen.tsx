@@ -54,12 +54,13 @@ export function UserDetailsScreen() {
 
     const loadUserData = useCallback(() => {
         try {
-            const objectId = new BSON.ObjectId(userId);
-            const userObj = userService.getUsers().users.find(u => u._id.equals(objectId));
+            const userObj = userService.getUserById(userId);
             if (userObj) {
                 setUser(userObj);
-                const pending = orderService.getPendingFlourAmountByUser(objectId);
+                const pending = orderService.getPendingFlourAmountByUser(userId);
                 setPendingFlour(pending);
+            } else {
+                setSnackbarMessage('الزبون غير موجود');
             }
         } catch (error) {
             setSnackbarMessage('فشل تحميل بيانات الزبون');
@@ -109,6 +110,8 @@ export function UserDetailsScreen() {
 
     const handleDeleteUser = () => {
         setIsDeleteDialogVisible(false);
+        // Null out user state immediately to prevent accessing invalidated Realm object
+        setUser(null);
         // Navigate away first to avoid the screen re-rendering with stale data
         navigation.goBack();
         // Then delete from Realm
@@ -170,7 +173,7 @@ export function UserDetailsScreen() {
         );
     };
 
-    if (!user) {
+    if (!user || !user.isValid()) {
         return (
             <View className="flex-1 bg-background items-center justify-center">
                 <ActivityIndicator size="large" />

@@ -28,6 +28,7 @@ export function CustomersScreen() {
     // Ref-based guards to avoid stale closure issues
     const isFetchingMoreRef = useRef(false);
     const fetchIdRef = useRef(0);
+    const hasMountedRef = useRef(false);
 
     const loadInitialUsers = useCallback(() => {
         // Increment fetchId so any in-flight loadMoreUsers knows it's stale
@@ -46,22 +47,24 @@ export function CustomersScreen() {
         setIsLoading(false);
     }, [debouncedSearch]);
 
-    // Initial load and search effect
+    // Initial load and search/tab changes
     useEffect(() => {
         if (activeTab === CUSTOMER_TABS.CUSTOMERS) {
             loadInitialUsers();
         }
     }, [debouncedSearch, activeTab, loadInitialUsers]);
 
-    // Handle full refresh when screen gains focus after navigating back (e.g., from Delete)
+    // Refresh data only when screen regains focus (not on initial mount)
     useFocusEffect(
         useCallback(() => {
+            if (!hasMountedRef.current) {
+                hasMountedRef.current = true;
+                return;
+            }
             if (activeTab === CUSTOMER_TABS.CUSTOMERS) {
-                // If it's already loading, do not trigger a conflicting double-load
-                if (isLoading) return;
                 loadInitialUsers();
             }
-        }, [activeTab, loadInitialUsers, isLoading])
+        }, [activeTab, debouncedSearch]) // eslint-disable-line react-hooks/exhaustive-deps
     );
 
     const loadMoreUsers = useCallback(() => {

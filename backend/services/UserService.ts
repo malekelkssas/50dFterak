@@ -60,6 +60,16 @@ class UserService {
     }
 
     /**
+     * Get a single user by its _id using primary key lookup.
+     */
+    getUserById(id: BSON.ObjectId | string): User | null {
+        const realm = getRealm();
+        const objectId =
+            typeof id === 'string' ? new BSON.ObjectId(id) : id;
+        return realm.objectForPrimaryKey(User, objectId);
+    }
+
+    /**
      * Create a new user.
      */
     addUser(data: UserData): User {
