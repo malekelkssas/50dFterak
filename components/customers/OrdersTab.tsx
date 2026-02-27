@@ -28,6 +28,13 @@ export function OrdersTab() {
     const fetchIdRef = useRef(0);
     const hasMountedRef = useRef(false);
 
+    // Keep track of the latest callbacks and state to avoid stale closures in useFocusEffect
+    const latestStateRef = useRef({
+        loadWeekOrderDays: (date: Date) => { },
+        loadInitialOrders: () => { },
+        weekStartDate
+    });
+
     // Fetch the pending order dots for the current week
     const loadWeekOrderDays = useCallback((date: Date) => {
         try {
@@ -71,6 +78,10 @@ export function OrdersTab() {
         loadInitialOrders();
     }, [selectedDate, loadInitialOrders]);
 
+    useEffect(() => {
+        latestStateRef.current = { loadWeekOrderDays, loadInitialOrders, weekStartDate };
+    }, [loadWeekOrderDays, loadInitialOrders, weekStartDate]);
+
     // Refresh when screen gains focus (e.g. returning from UserDetailsScreen)
     useFocusEffect(
         useCallback(() => {
@@ -78,19 +89,13 @@ export function OrdersTab() {
                 hasMountedRef.current = true;
                 return;
             }
-            // we only want this to run when the screen comes BACK into focus, 
-            // not when weekStartDate/selectedDate change while we are already focused.
-            // So we deliberately exclude them from the dependency array, but we need
-            // to call the fetching functions.
-            // To be safe and avoid stale closures, we can just trigger a re-fetch
-            // by setting fetchId directly or let the functions run.
-            // Since loadWeekOrderDays and loadInitialOrders are wrapped in useCallback
-            // with their own dependencies, they might be stale here if we use [] deps.
-            // Let's use a ref to track if we just focused.
-            loadWeekOrderDays(weekStartDate);
-            loadInitialOrders();
-            // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [/* deliberately empty to only run on focus */])
+
+            // Use the ref to access the latest callbacks and state, avoiding stale closures
+            // without needing to put them in the dependency array (which would cause double fetches)
+            const { loadWeekOrderDays: currentLoadWeekOrderDays, loadInitialOrders: currentLoadInitialOrders, weekStartDate: currentWeekStartDate } = latestStateRef.current;
+            currentLoadWeekOrderDays(currentWeekStartDate);
+            currentLoadInitialOrders();
+        }, [])
     );
 
     const loadMoreOrders = useCallback(() => {

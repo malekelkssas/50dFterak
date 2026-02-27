@@ -29,6 +29,8 @@ export function CustomersTab() {
     const fetchIdRef = useRef(0);
     const hasMountedRef = useRef(false);
 
+    const latestStateRef = useRef({ loadInitialUsers: () => { } });
+
     const loadInitialUsers = useCallback(() => {
         // Increment fetchId so any in-flight loadMoreUsers knows it's stale
         fetchIdRef.current += 1;
@@ -51,6 +53,10 @@ export function CustomersTab() {
         loadInitialUsers();
     }, [debouncedSearch, loadInitialUsers]);
 
+    useEffect(() => {
+        latestStateRef.current = { loadInitialUsers };
+    }, [loadInitialUsers]);
+
     // Refresh data only when screen regains focus (not on initial mount)
     useFocusEffect(
         useCallback(() => {
@@ -58,8 +64,8 @@ export function CustomersTab() {
                 hasMountedRef.current = true;
                 return;
             }
-            loadInitialUsers();
-        }, [debouncedSearch]) // eslint-disable-line react-hooks/exhaustive-deps
+            latestStateRef.current.loadInitialUsers();
+        }, [])
     );
 
     const loadMoreUsers = useCallback(() => {
