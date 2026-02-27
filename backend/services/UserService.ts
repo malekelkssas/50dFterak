@@ -1,6 +1,7 @@
 import { BSON } from 'realm';
 import { getRealm } from '../realm';
 import { User, UserData, UserUpdateData } from '../models/User';
+import { toPlainUser, PlainUser } from '../realmHelpers';
 
 const PAGE_SIZE = 20;
 
@@ -25,7 +26,7 @@ class UserService {
         cursor?: Date,
         limit: number = PAGE_SIZE,
         search?: string,
-    ): { users: User[]; nextCursor: Date | null } {
+    ): { users: PlainUser[]; nextCursor: Date | null } {
         const realm = getRealm();
 
         let results = realm.objects(User);
@@ -56,23 +57,25 @@ class UserService {
                 ? users[users.length - 1].createdAt
                 : null;
 
-        return { users, nextCursor };
+        return { users: users.map(toPlainUser), nextCursor };
     }
 
     /**
      * Get a single user by its _id using primary key lookup.
+     * Returns a plain JS snapshot (not a Realm proxy).
      */
-    getUserById(id: BSON.ObjectId | string): User | null {
+    getUserById(id: BSON.ObjectId | string): PlainUser | null {
         const realm = getRealm();
         const objectId =
             typeof id === 'string' ? new BSON.ObjectId(id) : id;
-        return realm.objectForPrimaryKey(User, objectId);
+        const user = realm.objectForPrimaryKey(User, objectId);
+        return user ? toPlainUser(user) : null;
     }
 
     /**
      * Create a new user.
      */
-    addUser(data: UserData): User {
+    addUser(data: UserData): PlainUser {
         const realm = getRealm();
         let user!: User;
 
@@ -86,7 +89,7 @@ class UserService {
             });
         });
 
-        return user;
+        return toPlainUser(user);
     }
 
     /**
@@ -96,7 +99,7 @@ class UserService {
     updateUser(
         id: BSON.ObjectId | string,
         data: UserUpdateData,
-    ): User {
+    ): PlainUser {
         const realm = getRealm();
         const objectId =
             typeof id === 'string' ? new BSON.ObjectId(id) : id;
@@ -119,7 +122,7 @@ class UserService {
             }
         });
 
-        return user;
+        return toPlainUser(user);
     }
 
     /**

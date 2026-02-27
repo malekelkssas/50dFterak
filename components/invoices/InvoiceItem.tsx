@@ -1,15 +1,14 @@
 import React from 'react';
 import { View, Pressable } from 'react-native';
 import { Text, Card } from '@/components/ui';
-import { Invoice } from '@/backend';
+import type { PlainInvoice } from '@/backend';
 import { Trash2, Edit2, Info } from 'lucide-react-native';
-import { BSON } from 'realm';
 
 interface InvoiceItemProps {
-    invoice: Invoice;
-    onDelete?: (id: BSON.ObjectId) => void;
-    onEdit?: (id: BSON.ObjectId) => void;
-    onViewDetails?: (invoice: Invoice) => void;
+    invoice: PlainInvoice;
+    onDelete?: (id: string) => void;
+    onEdit?: (id: string) => void;
+    onViewDetails?: (invoice: PlainInvoice) => void;
 }
 
 import { formatCurrency, formatTime } from '@/utils/formatters';

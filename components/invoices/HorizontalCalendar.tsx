@@ -3,15 +3,9 @@ import { View, FlatList, Pressable } from 'react-native';
 import { Text, Badge, ActivityIndicator } from '@/components/ui';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
-import { SCHEME_DARK, SCHEME_LIGHT } from '@/utils/constants/theme';
+import { SCHEME_DARK, SCHEME_LIGHT, ARABIC_MONTHS, ARABIC_DAYS } from '@/utils/constants';
 
 
-const ARABIC_MONTHS = [
-    'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-    'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
-];
-
-const ARABIC_DAYS = ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
 
 interface HorizontalCalendarProps {
     selectedDate: Date;

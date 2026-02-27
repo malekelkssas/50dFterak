@@ -1,23 +1,30 @@
 import React, { useState } from 'react';
-import { View } from 'react-native';
+import { View, Pressable, Platform } from 'react-native';
 import { Dialog, TextInput, Button, Text, Portal } from '@/components/ui';
 import { CUSTOMERS_STRINGS } from '@/utils/constants';
-import { AlertTriangle } from 'lucide-react-native';
+import { AlertTriangle, Calendar as CalendarIcon } from 'lucide-react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 interface AddOrderModalProps {
     visible: boolean;
     userFlourBalance: number;
     onDismiss: () => void;
-    onSave: (flourAmount: number) => void;
+    onSave: (flourAmount: number, date: Date) => void;
 }
 
 export function AddOrderModal({ visible, userFlourBalance, onDismiss, onSave }: AddOrderModalProps) {
     const [flourAmount, setFlourAmount] = useState('');
     const [flourError, setFlourError] = useState('');
 
+    // Date State
+    const [date, setDate] = useState(new Date());
+    const [showDatePicker, setShowDatePicker] = useState(false);
+
     const handleDismiss = () => {
         setFlourAmount('');
         setFlourError('');
+        setDate(new Date());
+        setShowDatePicker(false);
         onDismiss();
     };
 
@@ -34,10 +41,19 @@ export function AddOrderModal({ visible, userFlourBalance, onDismiss, onSave }: 
     const handleSave = () => {
         if (validate()) {
             const amount = parseFloat(flourAmount.trim());
-            onSave(amount);
+            onSave(amount, date);
+
+            // Reset for next time
             setFlourAmount('');
             setFlourError('');
+            setDate(new Date());
         }
+    };
+
+    const onDateChange = (event: any, selectedDate?: Date) => {
+        const currentDate = selectedDate || date;
+        setShowDatePicker(Platform.OS === 'ios');
+        setDate(currentDate);
     };
 
     const parsedAmount = parseFloat(flourAmount.trim()) || 0;
@@ -60,6 +76,32 @@ export function AddOrderModal({ visible, userFlourBalance, onDismiss, onSave }: 
                             error={!!flourError}
                             errorText={flourError}
                         />
+
+                        {/* Date Picker Button */}
+                        <View>
+                            <Text variant="labelMedium" className="text-muted-foreground mb-1">
+                                {CUSTOMERS_STRINGS.LABEL_ORDER_DATE}
+                            </Text>
+                            <Pressable
+                                onPress={() => setShowDatePicker(true)}
+                                className="flex-row items-center justify-between border border-border/70 rounded-md px-3 h-12 bg-surface"
+                            >
+                                <Text variant="bodyLarge" className="text-foreground">
+                                    {date.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                </Text>
+                                <CalendarIcon size={20} color="#64748b" />
+                            </Pressable>
+                        </View>
+
+                        {showDatePicker && (
+                            <DateTimePicker
+                                testID="dateTimePicker"
+                                value={date}
+                                mode="date"
+                                display="default"
+                                onChange={onDateChange}
+                            />
+                        )}
 
                         {exceedsBalance && (
                             <View className="flex-row items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">

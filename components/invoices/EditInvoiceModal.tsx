@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { View, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Modal, Text, Button, TextInput } from '@/components/ui';
-import { invoiceService, InvoiceUpdateData, Invoice } from '@/backend';
+import { invoiceService, InvoiceUpdateData, PlainInvoice } from '@/backend';
 
 interface EditInvoiceModalProps {
     visible: boolean;
     onDismiss: () => void;
-    invoice: Invoice | null;
+    invoice: PlainInvoice | null;
     onSuccess: () => void;
 }
 

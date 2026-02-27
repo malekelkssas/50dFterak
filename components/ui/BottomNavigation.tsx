@@ -53,27 +53,30 @@ export function BottomNavigation({ state, descriptors, navigation }: BottomTabBa
                 else if (route.name === SCREENS.CUSTOMERS) IconComponent = Users;
 
                 return (
-                    <Pressable
-                        key={route.key}
-                        accessibilityRole="button"
-                        accessibilityState={isFocused ? { selected: true } : {}}
-                        onPress={onPress}
-                        className="flex-1 items-center justify-center h-full"
-                    >
-                        <View className={`px-5 py-2 rounded-full mb-1 ${isFocused ? 'bg-primary/15' : 'bg-transparent'}`}>
-                            <IconComponent
-                                size={20}
-                                strokeWidth={isFocused ? 2.5 : 2}
-                                color={isFocused ? primaryColor : secondaryColor}
-                            />
+                    <View key={route.key} className="flex-1 items-center justify-center h-full">
+                        <View className={`rounded-full overflow-hidden mb-1 ${isFocused ? 'bg-primary/15' : 'bg-transparent'}`}>
+                            <Pressable
+                                accessibilityRole="button"
+                                accessibilityState={isFocused ? { selected: true } : {}}
+                                onPress={onPress}
+                                android_ripple={{ color: scheme === SCHEME_DARK ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.15)', borderless: false }}
+                                className="px-5 py-2 items-center justify-center"
+                            >
+                                <IconComponent
+                                    size={20}
+                                    strokeWidth={isFocused ? 2.5 : 2}
+                                    color={isFocused ? primaryColor : secondaryColor}
+                                />
+                            </Pressable>
                         </View>
                         <Text
-                            className={`text-[10px] font-medium ${isFocused ? 'text-primary font-bold' : 'text-secondary'}`}
+                            className={`text-[10px] font-medium pt-0.5 ${isFocused ? 'text-primary font-bold' : 'text-secondary'}`}
                             numberOfLines={1}
+                            onPress={onPress}
                         >
                             {label as string}
                         </Text>
-                    </Pressable>
+                    </View>
                 );
             })}
         </View>

@@ -33,8 +33,12 @@ export const CUSTOMERS_STRINGS = {
     // Add Order Modal
     MODAL_ADD_ORDER_TITLE: 'طلب جديد',
     LABEL_ORDER_FLOUR: 'كمية الدقيق (كيلو)',
+    LABEL_ORDER_DATE: 'تاريخ الطلب',
     ERR_ORDER_FLOUR_INVALID: 'يجب أن تكون الكمية رقماً أكبر من صفر',
     WARNING_EXCEEDS_BALANCE: 'تحذير: الكمية المطلوبة تتجاوز رصيد الزبون الحالي',
+
+    DIALOG_DELETE_ORDER_TITLE: 'حذف الطلب',
+    DIALOG_DELETE_ORDER_DESC: 'هل أنت متأكد من حذف هذا الطلب نهائياً؟',
 } as const;
 
 export const CUSTOMER_TABS = {
