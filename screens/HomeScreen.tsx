@@ -1,6 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { Text, Card } from '@/components/ui';
+import { Logo } from '@/components/Logo';
 
 export function HomeScreen() {
 
@@ -10,15 +11,15 @@ export function HomeScreen() {
                 Fterak50d
             </Text>
 
-            {/* Duck Section */}
+            {/* Logo Section */}
             <Card mode="contained" className="w-full max-w-sm mt-6 p-4">
                 <Card.Content className="items-center">
-                    <Text className="text-5xl p-4">🦆</Text>
+                    <Logo className="mb-4" />
                     <Text variant="headlineMedium" className="mt-4 font-bold text-center">
-                        Quack Quack!
+                        Welcome!
                     </Text>
                     <Text variant="bodyMedium" className="text-secondary mt-2 text-center">
-                        Your friendly duck is here to keep you company 🎶
+                        Enjoy your experience with Fterak50d
                     </Text>
                 </Card.Content>
             </Card>
