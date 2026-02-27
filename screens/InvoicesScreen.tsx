@@ -5,10 +5,9 @@ import { Dialog } from '@/components/ui/Dialog';
 import { Plus, CalendarDays } from 'lucide-react-native';
 import { HorizontalCalendar } from '@/components/invoices/HorizontalCalendar';
 import { InvoiceItem } from '@/components/invoices/InvoiceItem';
-import { invoiceService, Invoice } from '@/backend';
+import { invoiceService, PlainInvoice } from '@/backend';
 import { AddInvoiceModal } from '@/components/invoices/AddInvoiceModal';
 import { EditInvoiceModal } from '@/components/invoices/EditInvoiceModal';
-import { BSON } from 'realm';
 import { formatCurrency } from '@/utils/formatters';
 
 export function InvoicesScreen() {
@@ -17,7 +16,7 @@ export function InvoicesScreen() {
 
     // Data states
     const [invoiceDays, setInvoiceDays] = useState<number[]>([]);
-    const [invoices, setInvoices] = useState<Invoice[]>([]);
+    const [invoices, setInvoices] = useState<PlainInvoice[]>([]);
     const [totalAmount, setTotalAmount] = useState<number>(0);
     const [loadingInvoices, setLoadingInvoices] = useState(true);
 
@@ -25,9 +24,9 @@ export function InvoicesScreen() {
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [successMsg, setSuccessMsg] = useState<string | null>(null);
     const [isAddModalVisible, setIsAddModalVisible] = useState(false);
-    const [itemToDelete, setItemToDelete] = useState<BSON.ObjectId | null>(null);
-    const [invoiceToEdit, setInvoiceToEdit] = useState<Invoice | null>(null);
-    const [invoiceDetails, setInvoiceDetails] = useState<Invoice | null>(null);
+    const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+    const [invoiceToEdit, setInvoiceToEdit] = useState<PlainInvoice | null>(null);
+    const [invoiceDetails, setInvoiceDetails] = useState<PlainInvoice | null>(null);
 
     // Fetch badge days when month changes
     const fetchBadgeDays = useCallback((date: Date) => {
@@ -116,7 +115,7 @@ export function InvoicesScreen() {
         fetchBadgeDays(currentMonthDate); // Re-fetch badge days in case the total amount for a day changes its badge status
     };
 
-    const handleDeleteInvoiceRequest = (id: BSON.ObjectId) => {
+    const handleDeleteInvoiceRequest = (id: string) => {
         setItemToDelete(id);
     };
 
@@ -135,12 +134,12 @@ export function InvoicesScreen() {
         }
     };
 
-    const handleEditInvoice = (id: BSON.ObjectId) => {
-        const inv = invoices.find(i => i._id.toHexString() === id.toHexString());
+    const handleEditInvoice = (id: string) => {
+        const inv = invoices.find(i => i._id === id);
         if (inv) setInvoiceToEdit(inv);
     };
 
-    const handleViewDetails = (invoice: Invoice) => {
+    const handleViewDetails = (invoice: PlainInvoice) => {
         setInvoiceDetails(invoice);
     };
 
@@ -192,7 +191,7 @@ export function InvoicesScreen() {
                 ) : (
                     <FlatList
                         data={invoices}
-                        keyExtractor={(item) => item._id.toHexString()}
+                        keyExtractor={(item) => item._id}
                         contentContainerStyle={{ paddingBottom: 100, paddingTop: 8 }}
                         ListHeaderComponent={
                             <View className="mx-4 mb-4 p-4 bg-primary/10 rounded-2xl items-center flex-row justify-between">

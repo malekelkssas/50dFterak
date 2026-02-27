@@ -3,7 +3,6 @@ import { View, Pressable, FlatList } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useColorScheme } from 'nativewind';
 import { ChevronLeft, Pencil, Trash2, Plus, Clock, Check, UserCircle } from 'lucide-react-native';
-import { BSON } from 'realm';
 
 import {
     Text,
@@ -16,11 +15,11 @@ import {
 } from '@/components/ui';
 import { EditUserModal } from '@/components/users/EditUserModal';
 import { AddOrderModal } from '@/components/users/AddOrderModal';
+import { OrderCard } from '@/components/customers/OrderCard';
 
 import { userService } from '@/backend/services/UserService';
 import { orderService } from '@/backend/services/OrderService';
-import type { User } from '@/backend/models/User';
-import type { Order } from '@/backend/models/Order';
+import type { PlainUser, PlainOrder } from '@/backend/realmHelpers';
 
 import type { AppNavigationProp, AppRouteProp } from '@/utils/types';
 import { SCHEME_DARK, CUSTOMERS_STRINGS } from '@/utils/constants';
@@ -36,10 +35,10 @@ export function UserDetailsScreen() {
     const isDark = colorScheme === SCHEME_DARK;
     const iconColor = isDark ? '#ffffff' : '#000000';
 
-    // State
-    const [user, setUser] = useState<User | null>(null);
+    // State — plain JS snapshots, disconnected from Realm
+    const [user, setUser] = useState<PlainUser | null>(null);
     const [pendingFlour, setPendingFlour] = useState(0);
-    const [orders, setOrders] = useState<Order[]>([]);
+    const [orders, setOrders] = useState<PlainOrder[]>([]);
 
     // Pagination
     const [nextCursor, setNextCursor] = useState<Date | null>(null);
@@ -110,70 +109,50 @@ export function UserDetailsScreen() {
 
     const handleDeleteUser = () => {
         setIsDeleteDialogVisible(false);
-        // Null out user state immediately to prevent accessing invalidated Realm object
         setUser(null);
-        // Navigate away first to avoid the screen re-rendering with stale data
-        navigation.goBack();
-        // Then delete from Realm
         userService.deleteUser(userId);
+        navigation.goBack();
     };
 
     const handleToggleOrder = (orderId: string) => {
         orderService.toggleDone(orderId);
-        // Refresh pending flour amount
+        // Re-fetch fresh snapshots
         loadUserData();
-        // Since the realm object updates in memory, we can just trigger a re-render
-        // For flatlist to catch it securely, we can spread the list or let Realm auto-update handle it.
-        // We will spread to force UI update on the toggle button safely.
-        setOrders([...orders]);
+        loadInitialOrders();
     };
 
-    const handleAddOrder = (flourAmount: number) => {
+    const handleAddOrder = (flourAmount: number, orderDate: Date) => {
         if (!user) return;
-        const now = new Date();
         orderService.addOrder({
-            day: now.getDate(),
-            month: now.getMonth() + 1,
-            year: now.getFullYear(),
+            day: orderDate.getDate(),
+            month: orderDate.getMonth() + 1,
+            year: orderDate.getFullYear(),
             flourAmount,
-            user,
+            userId,
         });
         setIsAddOrderModalVisible(false);
         loadUserData();
         loadInitialOrders();
     };
 
-    const renderOrderItem = ({ item }: { item: Order }) => {
-        const isDone = !!item.doneAt;
+    const handleDeleteOrder = (orderId: string) => {
+        orderService.deleteOrder(orderId);
+        loadUserData();
+        loadInitialOrders();
+    };
 
+    const renderOrderItem = ({ item }: { item: PlainOrder }) => {
         return (
-            <View className="bg-surface p-4 rounded-xl mb-3 border border-border flex-row items-center justify-between shadow-sm">
-                <View className="flex-1">
-                    <Text variant="titleMedium" className="font-bold mb-1">
-                        {item.flourAmount} {CUSTOMERS_STRINGS.KILO_UNIT}
-                    </Text>
-                    <Text variant="bodySmall" className="text-muted-foreground">
-                        {item.createdAt.toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' })}
-                    </Text>
-                    {isDone && item.doneAt && (
-                        <Text variant="bodySmall" className="text-emerald-500 mt-0.5">
-                            ✓ {item.doneAt.toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' })}
-                        </Text>
-                    )}
-                </View>
-
-                <ToggleButton
-                    value={item._id.toHexString()}
-                    status={isDone ? 'checked' : 'unchecked'}
-                    onPress={() => handleToggleOrder(item._id.toHexString())}
-                    icon={isDone ? <Check size={20} color="#10b981" /> : <Clock size={20} color="#f59e0b" />}
-                    className={`border ${isDone ? 'border-emerald-500/30' : 'border-amber-500/30'}`}
-                />
-            </View>
+            <OrderCard
+                item={item}
+                showUserInfo={false}
+                onToggleStatus={handleToggleOrder}
+                onDelete={handleDeleteOrder}
+            />
         );
     };
 
-    if (!user || !user.isValid()) {
+    if (!user) {
         return (
             <View className="flex-1 bg-background items-center justify-center">
                 <ActivityIndicator size="large" />
@@ -260,7 +239,7 @@ export function UserDetailsScreen() {
                 ) : (
                     <FlatList
                         data={orders}
-                        keyExtractor={(item) => item._id.toHexString()}
+                        keyExtractor={(item) => item._id}
                         renderItem={renderOrderItem}
                         contentContainerStyle={{ paddingBottom: 100 }}
                         onEndReached={loadMoreOrders}

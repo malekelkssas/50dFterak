@@ -1,6 +1,7 @@
 import { BSON } from 'realm';
 import { getRealm } from '../realm';
 import { Invoice, InvoiceData, InvoiceUpdateData } from '../models/Invoice';
+import { toPlainInvoice, PlainInvoice } from '../realmHelpers';
 
 class InvoiceService {
     private static instance: InvoiceService;
@@ -35,7 +36,7 @@ class InvoiceService {
      * Get invoices for a specific year, month, and day.
      * If day is omitted, defaults to today's day.
      */
-    getInvoices(year: number, month: number, day?: number): Invoice[] {
+    getInvoices(year: number, month: number, day?: number): PlainInvoice[] {
         const realm = getRealm();
         const targetDay = day ?? new Date().getDate();
 
@@ -49,21 +50,36 @@ class InvoiceService {
             )
             .sorted('createdAt', true); // true = descending (newest first)
 
-        return [...results];
+        return [...results].map(toPlainInvoice);
     }
 
     /**
      * Calculate total amount for a specific date
      */
     getTotalAmountForDate(year: number, month: number, day?: number): number {
-        const invoices = this.getInvoices(year, month, day);
-        return invoices.reduce((sum, inv) => sum + (inv.price * (inv.quantity || 1)), 0);
+        const realm = getRealm();
+        const targetDay = day ?? new Date().getDate();
+
+        const results = realm
+            .objects(Invoice)
+            .filtered(
+                'year == $0 AND month == $1 AND day == $2',
+                year,
+                month,
+                targetDay,
+            );
+
+        let total = 0;
+        for (const inv of results) {
+            total += inv.price * (inv.quantity || 1);
+        }
+        return total;
     }
 
     /**
      * Create a new invoice.
      */
-    addInvoice(data: InvoiceData): Invoice {
+    addInvoice(data: InvoiceData): PlainInvoice {
         const realm = getRealm();
         let invoice!: Invoice;
 
@@ -82,7 +98,7 @@ class InvoiceService {
             });
         });
 
-        return invoice;
+        return toPlainInvoice(invoice);
     }
 
     /**
@@ -92,7 +108,7 @@ class InvoiceService {
     updateInvoice(
         id: BSON.ObjectId | string,
         data: InvoiceUpdateData,
-    ): Invoice {
+    ): PlainInvoice {
         const realm = getRealm();
         const objectId =
             typeof id === 'string' ? new BSON.ObjectId(id) : id;
@@ -130,7 +146,7 @@ class InvoiceService {
             }
         });
 
-        return invoice;
+        return toPlainInvoice(invoice);
     }
 
     /**
