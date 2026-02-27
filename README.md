@@ -136,9 +136,9 @@ sdk.dir=/home/<your-username>/Android/Sdk
 > **⚠️ Key Gotcha:** CSS `:root` / `.dark` selectors do NOT work on React Native. They only work on web. On native, you must use NativeWind's `vars()` function via a `ThemeProvider` wrapper.
 
 ```
-tailwind.config.js  ──→  defines color tokens using CSS vars
-ThemeProvider        ──→  injects variable values via vars() (native)
-ThemeToggle          ──→  toggleColorScheme()
+tailwind.config.js  ──>  defines color tokens using CSS vars
+ThemeProvider        ──>  injects variable values via vars() (native)
+ThemeToggle          ──>  toggleColorScheme()
 ```
 
 ### 1. Color Tokens (`tailwind.config.js`)
