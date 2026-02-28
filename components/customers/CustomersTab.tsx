@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, FlatList, Pressable } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { Text, Searchbar, Button, ActivityIndicator } from '@/components/ui';
+import { Text, Searchbar, Button, ActivityIndicator, Snackbar } from '@/components/ui';
 import { userService } from '@/backend/services/UserService';
 import type { PlainUser } from '@/backend/realmHelpers';
 import type { AppNavigationProp } from '@/utils/types';
@@ -23,6 +23,9 @@ export function CustomersTab() {
     const [isLoading, setIsLoading] = useState(true);
     const [isFetchingMore, setIsFetchingMore] = useState(false);
     const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+
+    const flatListRef = useRef<FlatList>(null);
 
     // Ref-based guards to avoid stale closure issues
     const isFetchingMoreRef = useRef(false);
@@ -46,6 +49,11 @@ export function CustomersTab() {
         setUsers(newUsers);
         setNextCursor(cursor);
         setIsLoading(false);
+
+        // Auto-scroll to top when reloading initial users (e.g. on focus or search)
+        if (flatListRef.current) {
+            flatListRef.current.scrollToOffset({ offset: 0, animated: false });
+        }
     }, [debouncedSearch]);
 
     // Initial load and search changes
@@ -72,26 +80,36 @@ export function CustomersTab() {
         if (!nextCursor || isFetchingMoreRef.current || isLoading) return;
 
         isFetchingMoreRef.current = true;
-        setIsFetchingMore(true);
-
+        setIsFetchingMore(true); // Keep this
         const capturedFetchId = fetchIdRef.current;
-        const { users: newUsers, nextCursor: cursor } = userService.getUsers(
-            nextCursor,
-            PAGE_SIZE,
-            debouncedSearch
-        );
 
-        // Bail out if a new initial load was triggered while we were fetching
-        if (capturedFetchId !== fetchIdRef.current) {
-            isFetchingMoreRef.current = false;
-            setIsFetchingMore(false);
-            return;
-        }
+        // Simulate a small network delay so the ActivityIndicator can actually render
+        // Since local Realm fetching is practically instantaneous, React batches
+        // the true/false state updates together otherwise.
+        setTimeout(() => {
+            try {
+                const { users: newUsers, nextCursor: cursor } = userService.getUsers(
+                    nextCursor,
+                    PAGE_SIZE,
+                    debouncedSearch
+                );
 
-        setUsers((prev) => [...prev, ...newUsers]);
-        setNextCursor(cursor);
-        isFetchingMoreRef.current = false;
-        setIsFetchingMore(false);
+                // Bail out if a new initial load was triggered while we were fetching
+                if (capturedFetchId !== fetchIdRef.current) {
+                    isFetchingMoreRef.current = false;
+                    setIsFetchingMore(false);
+                    return;
+                }
+
+                setUsers((prev) => [...prev, ...newUsers]);
+                setNextCursor(cursor);
+            } catch (error) {
+                setSnackbarMessage('فشل تحميل المزيد من العملاء');
+            } finally {
+                isFetchingMoreRef.current = false;
+                setIsFetchingMore(false);
+            }
+        }, 500);
     }, [nextCursor, isLoading, debouncedSearch]);
 
     const handleSaveUser = (data: { name: string; phoneNumber: string; flourAmount: number }) => {
@@ -101,7 +119,7 @@ export function CustomersTab() {
         loadInitialUsers();
     };
 
-    const renderUser = ({ item }: { item: PlainUser }) => {
+    const renderUser = useCallback(({ item }: { item: PlainUser }) => {
         return (
             <Pressable
                 className="bg-surface p-4 rounded-xl mb-3 shadow-md shadow-black/15 elevation-2 border border-border/50 dark:border-white/10"
@@ -127,7 +145,27 @@ export function CustomersTab() {
                 </View>
             </Pressable>
         );
-    };
+    }, [navigation]);
+
+    const renderFooter = useCallback(() => {
+        if (!isFetchingMore) return null;
+        return (
+            <View className="py-4 items-center h-20">
+                <ActivityIndicator size="small" />
+            </View>
+        );
+    }, [isFetchingMore]);
+
+    const renderEmpty = useCallback(() => {
+        return (
+            <View className="items-center justify-center py-10">
+                <Users size={48} color="#9ca3af" className="mb-4 opacity-50" />
+                <Text variant="bodyLarge" className="text-muted-foreground text-center">
+                    {CUSTOMERS_STRINGS.CUSTOMERS_EMPTY_SEARCH}
+                </Text>
+            </View>
+        );
+    }, []);
 
     return (
         <View className="flex-1">
@@ -158,27 +196,16 @@ export function CustomersTab() {
                 </View>
             ) : (
                 <FlatList
+                    ref={flatListRef}
                     data={users}
                     keyExtractor={(item) => item._id}
                     renderItem={renderUser}
                     contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
                     onEndReached={loadMoreUsers}
                     onEndReachedThreshold={0.5}
-                    ListEmptyComponent={() => (
-                        <View className="items-center justify-center py-10">
-                            <Users size={48} color="#9ca3af" className="mb-4 opacity-50" />
-                            <Text variant="bodyLarge" className="text-muted-foreground text-center">
-                                {CUSTOMERS_STRINGS.CUSTOMERS_EMPTY_SEARCH}
-                            </Text>
-                        </View>
-                    )}
-                    ListFooterComponent={() => (
-                        isFetchingMore ? (
-                            <View className="py-4 items-center">
-                                <ActivityIndicator size="small" />
-                            </View>
-                        ) : null
-                    )}
+                    extraData={isFetchingMore}
+                    ListEmptyComponent={renderEmpty}
+                    ListFooterComponent={renderFooter}
                 />
             )}
 
@@ -187,6 +214,14 @@ export function CustomersTab() {
                 onDismiss={() => setIsAddModalVisible(false)}
                 onSave={handleSaveUser}
             />
+
+            <Snackbar
+                visible={!!snackbarMessage}
+                onDismiss={() => setSnackbarMessage('')}
+                duration={3000}
+            >
+                {snackbarMessage}
+            </Snackbar>
         </View>
     );
 }

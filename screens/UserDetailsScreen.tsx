@@ -93,7 +93,7 @@ export function UserDetailsScreen() {
             } finally {
                 setIsFetchingMore(false);
             }
-        }, 100);
+        }, 500);
     }, [userId, nextCursor, isFetchingMore, isLoadingOrders]);
 
     useEffect(() => {
@@ -141,7 +141,7 @@ export function UserDetailsScreen() {
         loadInitialOrders();
     };
 
-    const renderOrderItem = ({ item }: { item: PlainOrder }) => {
+    const renderOrderItem = useCallback(({ item }: { item: PlainOrder }) => {
         return (
             <OrderCard
                 item={item}
@@ -150,7 +150,27 @@ export function UserDetailsScreen() {
                 onDelete={handleDeleteOrder}
             />
         );
-    };
+    }, [handleToggleOrder, handleDeleteOrder]);
+
+    const renderFooter = useCallback(() => {
+        if (!isFetchingMore) return null;
+        return (
+            <View className="py-4 items-center h-20">
+                <ActivityIndicator size="small" />
+            </View>
+        );
+    }, [isFetchingMore]);
+
+    const renderEmpty = useCallback(() => {
+        return (
+            <View className="items-center justify-center py-10 mt-10">
+                <Clock size={48} color="#9ca3af" className="mb-4 opacity-50" />
+                <Text variant="bodyLarge" className="text-muted-foreground text-center">
+                    لا يوجد طلبات سابقة.
+                </Text>
+            </View>
+        );
+    }, []);
 
     if (!user) {
         return (
@@ -244,21 +264,9 @@ export function UserDetailsScreen() {
                         contentContainerStyle={{ paddingBottom: 100 }}
                         onEndReached={loadMoreOrders}
                         onEndReachedThreshold={0.5}
-                        ListEmptyComponent={() => (
-                            <View className="items-center justify-center py-10 mt-10">
-                                <Clock size={48} color="#9ca3af" className="mb-4 opacity-50" />
-                                <Text variant="bodyLarge" className="text-muted-foreground text-center">
-                                    لا يوجد طلبات سابقة.
-                                </Text>
-                            </View>
-                        )}
-                        ListFooterComponent={() => (
-                            isFetchingMore ? (
-                                <View className="py-4 items-center">
-                                    <ActivityIndicator size="small" />
-                                </View>
-                            ) : null
-                        )}
+                        ListEmptyComponent={renderEmpty}
+                        extraData={isFetchingMore}
+                        ListFooterComponent={renderFooter}
                     />
                 )}
             </View>
@@ -275,6 +283,7 @@ export function UserDetailsScreen() {
             <AddOrderModal
                 visible={isAddOrderModalVisible}
                 userFlourBalance={user.flourAmount}
+                pendingFlour={pendingFlour}
                 onDismiss={() => setIsAddOrderModalVisible(false)}
                 onSave={handleAddOrder}
             />

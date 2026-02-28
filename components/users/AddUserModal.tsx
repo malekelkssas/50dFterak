@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View } from 'react-native';
 import { Dialog, TextInput, Button, Portal } from '@/components/ui';
 import { CUSTOMERS_STRINGS } from '@/utils/constants';
+import { userService } from '@/backend/services/UserService';
 
 interface AddUserModalProps {
     visible: boolean;
@@ -43,8 +44,12 @@ export function AddUserModal({ visible, onDismiss, onSave }: AddUserModalProps) 
         }
 
         const phoneRegex = /^01[0125][0-9]{8}$/;
-        if (!phoneRegex.test(phoneNumber.trim())) {
+        const trimmedPhone = phoneNumber.trim();
+        if (!phoneRegex.test(trimmedPhone)) {
             setPhoneError(CUSTOMERS_STRINGS.ERR_PHONE_INVALID);
+            isValid = false;
+        } else if (userService.getUserByPhoneNumber(trimmedPhone)) {
+            setPhoneError(CUSTOMERS_STRINGS.ERR_PHONE_EXISTS);
             isValid = false;
         } else {
             setPhoneError('');
