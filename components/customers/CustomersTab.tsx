@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, FlatList, Pressable } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { Text, Searchbar, Button, ActivityIndicator } from '@/components/ui';
+import { Text, Searchbar, Button, ActivityIndicator, Snackbar } from '@/components/ui';
 import { userService } from '@/backend/services/UserService';
 import type { PlainUser } from '@/backend/realmHelpers';
 import type { AppNavigationProp } from '@/utils/types';
@@ -23,6 +23,7 @@ export function CustomersTab() {
     const [isLoading, setIsLoading] = useState(true);
     const [isFetchingMore, setIsFetchingMore] = useState(false);
     const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
 
     const flatListRef = useRef<FlatList>(null);
 
@@ -79,30 +80,35 @@ export function CustomersTab() {
         if (!nextCursor || isFetchingMoreRef.current || isLoading) return;
 
         isFetchingMoreRef.current = true;
-        setIsFetchingMore(true);
+        setIsFetchingMore(true); // Keep this
+        const capturedFetchId = fetchIdRef.current;
 
         // Simulate a small network delay so the ActivityIndicator can actually render
         // Since local Realm fetching is practically instantaneous, React batches
         // the true/false state updates together otherwise.
         setTimeout(() => {
-            const capturesFetchId2 = fetchIdRef.current;
-            const { users: newUsers, nextCursor: cursor } = userService.getUsers(
-                nextCursor,
-                PAGE_SIZE,
-                debouncedSearch
-            );
+            try {
+                const { users: newUsers, nextCursor: cursor } = userService.getUsers(
+                    nextCursor,
+                    PAGE_SIZE,
+                    debouncedSearch
+                );
 
-            // Bail out if a new initial load was triggered while we were fetching
-            if (capturesFetchId2 !== fetchIdRef.current) {
+                // Bail out if a new initial load was triggered while we were fetching
+                if (capturedFetchId !== fetchIdRef.current) {
+                    isFetchingMoreRef.current = false;
+                    setIsFetchingMore(false);
+                    return;
+                }
+
+                setUsers((prev) => [...prev, ...newUsers]);
+                setNextCursor(cursor);
+            } catch (error) {
+                setSnackbarMessage('فشل تحميل المزيد من العملاء');
+            } finally {
                 isFetchingMoreRef.current = false;
                 setIsFetchingMore(false);
-                return;
             }
-
-            setUsers((prev) => [...prev, ...newUsers]);
-            setNextCursor(cursor);
-            isFetchingMoreRef.current = false;
-            setIsFetchingMore(false);
         }, 500);
     }, [nextCursor, isLoading, debouncedSearch]);
 
@@ -208,6 +214,14 @@ export function CustomersTab() {
                 onDismiss={() => setIsAddModalVisible(false)}
                 onSave={handleSaveUser}
             />
+
+            <Snackbar
+                visible={!!snackbarMessage}
+                onDismiss={() => setSnackbarMessage('')}
+                duration={3000}
+            >
+                {snackbarMessage}
+            </Snackbar>
         </View>
     );
 }
