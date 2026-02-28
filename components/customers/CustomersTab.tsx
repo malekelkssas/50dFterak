@@ -24,6 +24,8 @@ export function CustomersTab() {
     const [isFetchingMore, setIsFetchingMore] = useState(false);
     const [isAddModalVisible, setIsAddModalVisible] = useState(false);
 
+    const flatListRef = useRef<FlatList>(null);
+
     // Ref-based guards to avoid stale closure issues
     const isFetchingMoreRef = useRef(false);
     const fetchIdRef = useRef(0);
@@ -46,6 +48,11 @@ export function CustomersTab() {
         setUsers(newUsers);
         setNextCursor(cursor);
         setIsLoading(false);
+
+        // Auto-scroll to top when reloading initial users (e.g. on focus or search)
+        if (flatListRef.current) {
+            flatListRef.current.scrollToOffset({ offset: 0, animated: false });
+        }
     }, [debouncedSearch]);
 
     // Initial load and search changes
@@ -74,24 +81,29 @@ export function CustomersTab() {
         isFetchingMoreRef.current = true;
         setIsFetchingMore(true);
 
-        const capturedFetchId = fetchIdRef.current;
-        const { users: newUsers, nextCursor: cursor } = userService.getUsers(
-            nextCursor,
-            PAGE_SIZE,
-            debouncedSearch
-        );
+        // Simulate a small network delay so the ActivityIndicator can actually render
+        // Since local Realm fetching is practically instantaneous, React batches
+        // the true/false state updates together otherwise.
+        setTimeout(() => {
+            const capturesFetchId2 = fetchIdRef.current;
+            const { users: newUsers, nextCursor: cursor } = userService.getUsers(
+                nextCursor,
+                PAGE_SIZE,
+                debouncedSearch
+            );
 
-        // Bail out if a new initial load was triggered while we were fetching
-        if (capturedFetchId !== fetchIdRef.current) {
+            // Bail out if a new initial load was triggered while we were fetching
+            if (capturesFetchId2 !== fetchIdRef.current) {
+                isFetchingMoreRef.current = false;
+                setIsFetchingMore(false);
+                return;
+            }
+
+            setUsers((prev) => [...prev, ...newUsers]);
+            setNextCursor(cursor);
             isFetchingMoreRef.current = false;
             setIsFetchingMore(false);
-            return;
-        }
-
-        setUsers((prev) => [...prev, ...newUsers]);
-        setNextCursor(cursor);
-        isFetchingMoreRef.current = false;
-        setIsFetchingMore(false);
+        }, 500);
     }, [nextCursor, isLoading, debouncedSearch]);
 
     const handleSaveUser = (data: { name: string; phoneNumber: string; flourAmount: number }) => {
@@ -101,7 +113,7 @@ export function CustomersTab() {
         loadInitialUsers();
     };
 
-    const renderUser = ({ item }: { item: PlainUser }) => {
+    const renderUser = useCallback(({ item }: { item: PlainUser }) => {
         return (
             <Pressable
                 className="bg-surface p-4 rounded-xl mb-3 shadow-md shadow-black/15 elevation-2 border border-border/50 dark:border-white/10"
@@ -127,7 +139,27 @@ export function CustomersTab() {
                 </View>
             </Pressable>
         );
-    };
+    }, [navigation]);
+
+    const renderFooter = useCallback(() => {
+        if (!isFetchingMore) return null;
+        return (
+            <View className="py-4 items-center h-20">
+                <ActivityIndicator size="small" />
+            </View>
+        );
+    }, [isFetchingMore]);
+
+    const renderEmpty = useCallback(() => {
+        return (
+            <View className="items-center justify-center py-10">
+                <Users size={48} color="#9ca3af" className="mb-4 opacity-50" />
+                <Text variant="bodyLarge" className="text-muted-foreground text-center">
+                    {CUSTOMERS_STRINGS.CUSTOMERS_EMPTY_SEARCH}
+                </Text>
+            </View>
+        );
+    }, []);
 
     return (
         <View className="flex-1">
@@ -158,27 +190,16 @@ export function CustomersTab() {
                 </View>
             ) : (
                 <FlatList
+                    ref={flatListRef}
                     data={users}
                     keyExtractor={(item) => item._id}
                     renderItem={renderUser}
                     contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
                     onEndReached={loadMoreUsers}
                     onEndReachedThreshold={0.5}
-                    ListEmptyComponent={() => (
-                        <View className="items-center justify-center py-10">
-                            <Users size={48} color="#9ca3af" className="mb-4 opacity-50" />
-                            <Text variant="bodyLarge" className="text-muted-foreground text-center">
-                                {CUSTOMERS_STRINGS.CUSTOMERS_EMPTY_SEARCH}
-                            </Text>
-                        </View>
-                    )}
-                    ListFooterComponent={() => (
-                        isFetchingMore ? (
-                            <View className="py-4 items-center">
-                                <ActivityIndicator size="small" />
-                            </View>
-                        ) : null
-                    )}
+                    extraData={isFetchingMore}
+                    ListEmptyComponent={renderEmpty}
+                    ListFooterComponent={renderFooter}
                 />
             )}
 

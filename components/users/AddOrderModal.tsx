@@ -8,11 +8,12 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 interface AddOrderModalProps {
     visible: boolean;
     userFlourBalance: number;
+    pendingFlour: number;
     onDismiss: () => void;
     onSave: (flourAmount: number, date: Date) => void;
 }
 
-export function AddOrderModal({ visible, userFlourBalance, onDismiss, onSave }: AddOrderModalProps) {
+export function AddOrderModal({ visible, userFlourBalance, pendingFlour, onDismiss, onSave }: AddOrderModalProps) {
     const [flourAmount, setFlourAmount] = useState('');
     const [flourError, setFlourError] = useState('');
 
@@ -57,7 +58,8 @@ export function AddOrderModal({ visible, userFlourBalance, onDismiss, onSave }: 
     };
 
     const parsedAmount = parseFloat(flourAmount.trim()) || 0;
-    const exceedsBalance = parsedAmount > 0 && parsedAmount > userFlourBalance;
+    const availableBalance = userFlourBalance - pendingFlour;
+    const exceedsBalance = parsedAmount > 0 && parsedAmount > availableBalance;
 
     return (
         <Portal>
@@ -108,7 +110,7 @@ export function AddOrderModal({ visible, userFlourBalance, onDismiss, onSave }: 
                                 <AlertTriangle size={18} color="#f59e0b" />
                                 <Text variant="bodySmall" className="text-amber-600 dark:text-amber-400 flex-1">
                                     {CUSTOMERS_STRINGS.WARNING_EXCEEDS_BALANCE}
-                                    {` (${CUSTOMERS_STRINGS.BALANCE_LABEL}: ${userFlourBalance} ${CUSTOMERS_STRINGS.KILO_UNIT})`}
+                                    {` (${CUSTOMERS_STRINGS.AVAILABLE_BALANCE_LABEL}: ${availableBalance} ${CUSTOMERS_STRINGS.KILO_UNIT})`}
                                 </Text>
                             </View>
                         )}

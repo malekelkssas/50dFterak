@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import { Dialog, TextInput, Button, Portal } from '@/components/ui';
 import { CUSTOMERS_STRINGS } from '@/utils/constants';
+import { userService } from '@/backend/services/UserService';
 
 interface EditUserModalProps {
     visible: boolean;
@@ -45,8 +46,15 @@ export function EditUserModal({ visible, initialData, onDismiss, onSave }: EditU
         }
 
         const phoneRegex = /^01[0125][0-9]{8}$/;
-        if (!phoneRegex.test(phoneNumber.trim())) {
+        const trimmedPhone = phoneNumber.trim();
+        if (!phoneRegex.test(trimmedPhone)) {
             setPhoneError(CUSTOMERS_STRINGS.ERR_PHONE_INVALID);
+            isValid = false;
+        } else if (
+            trimmedPhone !== initialData.phoneNumber &&
+            userService.getUserByPhoneNumber(trimmedPhone)
+        ) {
+            setPhoneError(CUSTOMERS_STRINGS.ERR_PHONE_EXISTS);
             isValid = false;
         } else {
             setPhoneError('');

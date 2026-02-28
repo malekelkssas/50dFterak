@@ -24,6 +24,8 @@ export function OrdersTab() {
     const [isFetchingMore, setIsFetchingMore] = useState(false);
     const [snackbarMessage, setSnackbarMessage] = useState('');
 
+    const flatListRef = useRef<FlatList>(null);
+
     const isFetchingMoreRef = useRef(false);
     const fetchIdRef = useRef(0);
     const hasMountedRef = useRef(false);
@@ -66,6 +68,11 @@ export function OrdersTab() {
             setSnackbarMessage('فشل تحميل الطلبات');
         } finally {
             setIsLoadingOrders(false);
+
+            // Auto-scroll to top when reloading initial orders (e.g. on focus or date change)
+            if (flatListRef.current) {
+                flatListRef.current.scrollToOffset({ offset: 0, animated: false });
+            }
         }
     }, [selectedDate]);
 
@@ -105,29 +112,31 @@ export function OrdersTab() {
         setIsFetchingMore(true);
 
         const capturedFetchId = fetchIdRef.current;
-        try {
-            const { orders: fetchedOrders, nextCursor: cursor } = orderService.getOrders(
-                selectedDate.getFullYear(),
-                selectedDate.getMonth() + 1,
-                selectedDate.getDate(),
-                nextCursor,
-                PAGE_SIZE
-            );
+        setTimeout(() => {
+            try {
+                const { orders: fetchedOrders, nextCursor: cursor } = orderService.getOrders(
+                    selectedDate.getFullYear(),
+                    selectedDate.getMonth() + 1,
+                    selectedDate.getDate(),
+                    nextCursor,
+                    PAGE_SIZE
+                );
 
-            if (capturedFetchId !== fetchIdRef.current) {
+                if (capturedFetchId !== fetchIdRef.current) {
+                    isFetchingMoreRef.current = false;
+                    setIsFetchingMore(false);
+                    return;
+                }
+
+                setOrders(prev => [...prev, ...fetchedOrders]);
+                setNextCursor(cursor);
+            } catch (error) {
+                setSnackbarMessage('فشل تحميل المزيد من الطلبات');
+            } finally {
                 isFetchingMoreRef.current = false;
                 setIsFetchingMore(false);
-                return;
             }
-
-            setOrders(prev => [...prev, ...fetchedOrders]);
-            setNextCursor(cursor);
-        } catch (error) {
-            setSnackbarMessage('فشل تحميل المزيد من الطلبات');
-        } finally {
-            isFetchingMoreRef.current = false;
-            setIsFetchingMore(false);
-        }
+        }, 500);
     }, [nextCursor, isLoadingOrders, selectedDate]);
 
     const handleToggleOrder = (orderId: string) => {
@@ -152,7 +161,7 @@ export function OrdersTab() {
         }
     };
 
-    const renderOrderItem = ({ item }: { item: PlainOrder }) => {
+    const renderOrderItem = useCallback(({ item }: { item: PlainOrder }) => {
         return (
             <OrderCard
                 item={item}
@@ -161,7 +170,27 @@ export function OrdersTab() {
                 onDelete={handleDeleteOrder}
             />
         );
-    };
+    }, [handleToggleOrder, handleDeleteOrder]);
+
+    const renderFooter = useCallback(() => {
+        if (!isFetchingMore) return null;
+        return (
+            <View className="py-4 items-center h-20">
+                <ActivityIndicator size="small" />
+            </View>
+        );
+    }, [isFetchingMore]);
+
+    const renderEmpty = useCallback(() => {
+        return (
+            <View className="items-center justify-center py-10">
+                <ShoppingBag size={48} color="#9ca3af" className="mb-4 opacity-50" />
+                <Text variant="bodyLarge" className="text-muted-foreground text-center">
+                    {CUSTOMERS_STRINGS.ORDERS_EMPTY_STATE}
+                </Text>
+            </View>
+        );
+    }, []);
 
     return (
         <View className="flex-1 bg-background">
@@ -181,27 +210,16 @@ export function OrdersTab() {
                 </View>
             ) : (
                 <FlatList
+                    ref={flatListRef}
                     data={orders}
                     keyExtractor={(item) => item._id}
                     renderItem={renderOrderItem}
                     contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
                     onEndReached={loadMoreOrders}
                     onEndReachedThreshold={0.5}
-                    ListEmptyComponent={() => (
-                        <View className="items-center justify-center py-10">
-                            <ShoppingBag size={48} color="#9ca3af" className="mb-4 opacity-50" />
-                            <Text variant="bodyLarge" className="text-muted-foreground text-center">
-                                {CUSTOMERS_STRINGS.ORDERS_EMPTY_STATE}
-                            </Text>
-                        </View>
-                    )}
-                    ListFooterComponent={() => (
-                        isFetchingMore ? (
-                            <View className="py-4 items-center">
-                                <ActivityIndicator size="small" />
-                            </View>
-                        ) : null
-                    )}
+                    ListEmptyComponent={renderEmpty}
+                    extraData={isFetchingMore}
+                    ListFooterComponent={renderFooter}
                 />
             )}
 

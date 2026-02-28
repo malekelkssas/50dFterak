@@ -73,6 +73,16 @@ class UserService {
     }
 
     /**
+     * Get a user by their phone number.
+     * Useful for checking if a phone number is already registered.
+     */
+    getUserByPhoneNumber(phoneNumber: string): PlainUser | null {
+        const realm = getRealm();
+        const results = realm.objects(User).filtered('phoneNumber == $0', phoneNumber);
+        return results.length > 0 ? toPlainUser(results[0]) : null;
+    }
+
+    /**
      * Create a new user.
      */
     addUser(data: UserData): PlainUser {
