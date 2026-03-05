@@ -1,0 +1,10 @@
+# Android local properties
+android/local.properties
+android/.gradle/
+android/build/
+android/app/build/
+android/app/.cxx/
+android/.kotlin/
+
+# Dependency directories
+node_modules/

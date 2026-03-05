@@ -1,2 +1,10 @@
+packages:
+  - 'apps/MOBILE'
+
 onlyBuiltDependencies:
-  - realm
+  - '@swc/core'
+  - detox
+  - dtrace-provider
+  - esbuild
+  - nx
+  - unrs-resolver
