@@ -1,2 +1,11 @@
+packages:
+  - 'apps/MOBILE'
+  - 'libs/design-tokens'
+
 onlyBuiltDependencies:
-  - realm
+  - '@swc/core'
+  - detox
+  - dtrace-provider
+  - esbuild
+  - nx
+  - unrs-resolver

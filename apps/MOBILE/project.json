@@ -1,0 +1,49 @@
+{
+  "name": "MOBILE",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/MOBILE/src",
+  "projectType": "application",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project MOBILE --web",
+  "targets": {
+    "android-clean": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "./gradlew clean",
+        "cwd": "apps/MOBILE/android"
+      }
+    },
+    "android-build-debug": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "./gradlew assembleDebug",
+        "cwd": "apps/MOBILE/android"
+      }
+    },
+    "android-build-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "./gradlew assembleRelease",
+        "cwd": "apps/MOBILE/android"
+      }
+    },
+    "adb-reconnect": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "adb reverse tcp:8081 tcp:8081"
+      }
+    },
+    "android-install-debug": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "adb install -r apps/MOBILE/android/app/build/outputs/apk/debug/app-debug.apk"
+      }
+    },
+    "android-install-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "adb install -r apps/MOBILE/android/app/build/outputs/apk/release/app-release.apk"
+      }
+    }
+  }
+}
