@@ -1,5 +1,6 @@
 packages:
   - 'apps/MOBILE'
+  - 'libs/design-tokens'
 
 onlyBuiltDependencies:
   - '@swc/core'

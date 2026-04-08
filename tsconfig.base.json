@@ -14,7 +14,9 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "design-tokens": ["libs/design-tokens/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

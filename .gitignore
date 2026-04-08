@@ -162,3 +162,5 @@ vite.config.ts.timestamp-*
 # Docusaurus build artifacts
 apps/DOCS/.docusaurus/
 apps/DOCS/build/
+
+.pnpm-store/

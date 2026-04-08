@@ -1,4 +1,5 @@
 module.exports = function (api) {
+  api.cache(true);
 
   const plugins = [
     [
@@ -10,9 +11,8 @@ module.exports = function (api) {
         },
       },
     ],
+    'react-native-reanimated/plugin',
   ];
-  
-  api.cache(true);
 
   if (
     process.env.NX_TASK_TARGET_TARGET === 'build' ||
@@ -26,7 +26,6 @@ module.exports = function (api) {
             runtime: 'automatic',
           },
         ],
-        'nativewind/babel',
       ],
       plugins,
     };
@@ -34,7 +33,7 @@ module.exports = function (api) {
 
   return {
     presets: [
-      ['module:@react-native/babel-preset', { useTransformReactJSX: true }],
+      ['@react-native/babel-preset', { useTransformReactJSX: true }],
       'nativewind/babel',
     ],
     plugins,

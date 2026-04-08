@@ -1,5 +1,10 @@
 {
   "extends": "./tsconfig.json",
+  "references": [
+    {
+      "path": "../../libs/design-tokens/tsconfig.json"
+    }
+  ],
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
     "types": [
