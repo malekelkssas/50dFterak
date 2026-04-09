@@ -19,6 +19,8 @@ export type PlainOrder = {
   month: number;
   year: number;
   flourAmount: number;
+  snapshotPricePerKg: number;
+  snapshotTotal: number;
   doneAt: Date | null;
   user: PlainUser | null;
 };
@@ -57,6 +59,8 @@ export function toPlainOrder(order: Order): PlainOrder {
     month: order.month,
     year: order.year,
     flourAmount: order.flourAmount,
+    snapshotPricePerKg: order.snapshotPricePerKg,
+    snapshotTotal: order.snapshotTotal,
     doneAt: order.doneAt,
     user: user && user.isValid() ? toPlainUser(user) : null,
   };
