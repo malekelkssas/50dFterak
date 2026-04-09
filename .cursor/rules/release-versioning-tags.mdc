@@ -1,0 +1,36 @@
+---
+description: Cut a release — bump semver everywhere, sync Android/iOS, tag git
+alwaysApply: true
+---
+
+# Release: version bump, native builds, and git tags
+
+When shipping a user-facing mobile slice, **all** of the following must stay in lockstep.
+
+## 1. JavaScript / monorepo semver
+
+Update **`version`** in both files to the same **semver** (e.g. `1.2.0`):
+
+- Root: `package.json`
+- App: `apps/MOBILE/package.json`
+
+Do **not** bump unrelated packages (e.g. `libs/design-tokens`) unless you intend a separate library release.
+
+## 2. Android (`apps/MOBILE/android/app/build.gradle`)
+
+Inside `defaultConfig { }`:
+
+- **`versionName`** — string, must match the semver above (e.g. `"1.2.0"`).
+- **`versionCode`** — integer; **must increase** for every upload to Play Console (e.g. `3` → `4`).
+
+Example: `versionCode 4` and `versionName "1.2.0"`.
+
+## 3. iOS (`apps/MOBILE/ios/MOBILE.xcodeproj/project.pbxproj`)
+
+`Info.plist` uses **`MARKETING_VERSION`** (semver, e.g. `1.2.0`) and **`CURRENT_PROJECT_VERSION`** (build number). Edit **both** MOBILE target **Debug** and **Release** blocks — values must match in both.
+
+## 4. Git tag + checklist
+
+Annotated tag: `git tag -a v1.2.0 -m "Release 1.2.0: …"` then `git push origin <branch>` and `git push origin v1.2.0`. If the tag already exists on a bad commit, coordinate before deleting/recreating or bump semver (e.g. `1.2.1`).
+
+**Checklist:** root + `apps/MOBILE` `package.json` → Android `versionName` + **+1** `versionCode` → iOS `MARKETING_VERSION` + **+1** `CURRENT_PROJECT_VERSION` (Debug & Release) → commit → tag → push.
