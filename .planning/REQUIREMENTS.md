@@ -47,25 +47,25 @@
 
 Which phases cover which requirements. Updated during roadmap creation.
 
-| Requirement | Phase | Status  |
-| ----------- | ----- | ------- |
-| PRICE-01    | —     | Pending |
-| PRICE-02    | —     | Pending |
-| PRICE-03    | —     | Pending |
-| ORD-01      | —     | Pending |
-| ORD-02      | —     | Pending |
-| ORD-03      | —     | Pending |
-| ORD-04      | —     | Pending |
-| REL-01      | —     | Pending |
-| REL-02      | —     | Pending |
+| Requirement | Phase   | Status  |
+| ----------- | ------- | ------- |
+| PRICE-01    | Phase 2 | Pending |
+| PRICE-02    | Phase 2 | Pending |
+| PRICE-03    | Phase 1 | Pending |
+| ORD-01      | Phase 1 | Pending |
+| ORD-02      | Phase 1 | Pending |
+| ORD-03      | Phase 2 | Pending |
+| ORD-04      | Phase 1 | Pending |
+| REL-01      | Phase 3 | Pending |
+| REL-02      | Phase 3 | Pending |
 
 **Coverage:**
 
 - v1 requirements: 9 total
-- Mapped to phases: 0
-- Unmapped: 9 ⚠️
+- Mapped to phases: 9
+- Unmapped: 0 ✓
 
 ---
 
 _Requirements defined: 2026-04-09_  
-_Last updated: 2026-04-09 after initial definition_
+_Last updated: 2026-04-09 after roadmap traceability_
