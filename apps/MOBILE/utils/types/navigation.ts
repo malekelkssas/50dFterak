@@ -14,6 +14,7 @@ export type BottomTabParamList = {
 export type RootStackParamList = {
   MainTabs: NavigatorScreenParams<BottomTabParamList>;
   UserDetails: { userId: string };
+  GlobalFlourPrice: undefined;
 };
 
 export type AppNavigationProp<T extends keyof RootStackParamList> =

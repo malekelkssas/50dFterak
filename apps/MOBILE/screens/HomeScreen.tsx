@@ -1,9 +1,14 @@
 import React from 'react';
 import { View } from 'react-native';
-import { Text, Card } from '@/components/ui';
+import { useNavigation } from '@react-navigation/native';
+import { Text, Card, Button } from '@/components/ui';
 import { Logo } from '@/components/Logo';
+import type { AppNavigationProp } from '@/utils/types';
+import { SCREENS, PRICING_STRINGS } from '@/utils/constants';
 
 export function HomeScreen() {
+  const navigation = useNavigation<AppNavigationProp<'MainTabs'>>();
+
   return (
     <View className="bg-background flex-1 items-center justify-center p-4">
       <Text variant="headlineSmall" className="mb-2">
@@ -23,6 +28,14 @@ export function HomeScreen() {
           >
             Enjoy your experience with Fterak50d
           </Text>
+          <Button
+            mode="outlined"
+            className="mt-6 min-h-12 w-full"
+            onPress={() => navigation.navigate(SCREENS.GLOBAL_FLOUR_PRICE)}
+            accessibilityLabel={`${PRICING_STRINGS.en.screenTitle}, ${PRICING_STRINGS.ar.screenTitle}`}
+          >
+            {PRICING_STRINGS.ar.screenTitle}
+          </Button>
         </Card.Content>
       </Card>
     </View>

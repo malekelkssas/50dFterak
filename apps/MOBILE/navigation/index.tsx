@@ -10,6 +10,7 @@ import { HomeScreen } from '@mobile/screens/HomeScreen';
 import { InvoicesScreen } from '@mobile/screens/InvoicesScreen';
 import { CustomersScreen } from '@mobile/screens/CustomersScreen';
 import { UserDetailsScreen } from '@mobile/screens/UserDetailsScreen';
+import { GlobalFlourPriceScreen } from '@mobile/screens/GlobalFlourPriceScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<BottomTabParamList>();
@@ -33,6 +34,10 @@ export function AppNavigator() {
     <Stack.Navigator id="RootStack" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="MainTabs" component={MainTabs} />
       <Stack.Screen name="UserDetails" component={UserDetailsScreen} />
+      <Stack.Screen
+        name="GlobalFlourPrice"
+        component={GlobalFlourPriceScreen}
+      />
     </Stack.Navigator>
   );
 }

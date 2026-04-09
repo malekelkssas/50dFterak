@@ -5,6 +5,16 @@ export const formatCurrency = (amount: number): string => {
   return amount.toLocaleString('ar-EG') + ' ج.م';
 };
 
+/** Snapshot order money: fixed 2 decimals, ar-EG grouping, same ج.م suffix as formatCurrency. */
+export const formatSnapshotMoney = (value: number): string => {
+  return (
+    value.toLocaleString('ar-EG', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }) + ' ج.م'
+  );
+};
+
 /**
  * Manually format time to be safe across RN intl implementations (AM/PM)
  */

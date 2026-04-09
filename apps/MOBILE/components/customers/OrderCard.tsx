@@ -8,7 +8,12 @@ import {
   Button,
 } from '@mobile/components/ui';
 import { Check, Clock, UserCircle, Trash2 } from 'lucide-react-native';
-import { CUSTOMERS_STRINGS, SCREENS } from '@mobile/utils/constants';
+import {
+  CUSTOMERS_STRINGS,
+  SCREENS,
+  ORDER_MONEY_STRINGS,
+} from '@mobile/utils/constants';
+import { formatSnapshotMoney } from '@mobile/utils/formatters';
 import type { PlainOrder } from '@mobile/backend/realmHelpers';
 import { useNavigation } from '@react-navigation/native';
 import type { AppNavigationProp } from '@mobile/utils/types';
@@ -122,6 +127,41 @@ export function OrderCard({
               {!showUserInfo &&
                 `- ${item.createdAt.toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' })}`}
             </Text>
+
+            <View className="mt-2 flex-row flex-wrap gap-x-6 gap-y-2">
+              <View>
+                <Text
+                  variant="labelSmall"
+                  className="text-muted-foreground mb-0.5"
+                >
+                  {ORDER_MONEY_STRINGS.ar.snapshotTotalLabel}
+                </Text>
+                <Text
+                  variant="bodyMedium"
+                  className="text-foreground font-medium"
+                  accessibilityLabel={`Snapshot total ${formatSnapshotMoney(item.snapshotTotal)}`}
+                >
+                  {formatSnapshotMoney(item.snapshotTotal)}
+                </Text>
+              </View>
+              <View>
+                <Text
+                  variant="labelSmall"
+                  className="text-muted-foreground mb-0.5"
+                >
+                  {ORDER_MONEY_STRINGS.ar.snapshotRateLabel}{' '}
+                  {CUSTOMERS_STRINGS.KILO_UNIT}
+                </Text>
+                <Text
+                  variant="bodyMedium"
+                  className="text-foreground font-medium"
+                  accessibilityLabel={`Snapshot price per kg ${formatSnapshotMoney(item.snapshotPricePerKg)}`}
+                >
+                  {formatSnapshotMoney(item.snapshotPricePerKg)}
+                </Text>
+              </View>
+            </View>
+
             {isDone && item.doneAt && (
               <Text variant="bodySmall" className="mt-0.5 text-emerald-500">
                 ✓ مكتمل{' '}
