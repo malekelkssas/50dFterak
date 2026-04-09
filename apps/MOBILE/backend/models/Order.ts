@@ -8,6 +8,8 @@ export class Order extends Realm.Object<Order> {
   month!: number;
   year!: number;
   flourAmount!: number;
+  snapshotPricePerKg!: number;
+  snapshotTotal!: number;
   user!: User;
   doneAt!: Date | null;
 
@@ -21,6 +23,8 @@ export class Order extends Realm.Object<Order> {
       month: 'int',
       year: 'int',
       flourAmount: 'double',
+      snapshotPricePerKg: { type: 'double', default: 0 },
+      snapshotTotal: { type: 'double', default: 0 },
       user: 'User',
       doneAt: 'date?',
     },

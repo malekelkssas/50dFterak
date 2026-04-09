@@ -10,4 +10,5 @@ export const SCREENS = {
   INVOICES: 'فواتيري',
   CUSTOMERS: 'زبايني',
   USER_DETAILS: 'UserDetails',
+  GLOBAL_FLOUR_PRICE: 'GlobalFlourPrice',
 } as const;

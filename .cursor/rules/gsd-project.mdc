@@ -1,0 +1,142 @@
+<!-- gsd-project-start source:PROJECT.md -->
+## Project
+
+**Fterak50d (bakery management)**
+
+A **React Native** bakery **management** app for a single operator (your friend), living in an **Nx** monorepo. It tracks **customers (users)**, **orders** (flour amounts by date, tied to a user), and related workflows (e.g. invoices UI). The product is **operator-first**; **end-customer ordering** is a possible future direction, not current scope.
+
+**Core Value:** **Reliable day-to-day bakery operations on the phone** — correct customer and order records, including **money clarity**: each order’s **total is fixed at creation time** from a **global per-kilogram price**, so history stays trustworthy when prices change.
+
+### Constraints
+
+- **Tech**: Stay on current stack (**Realm**, **Redux**, RN) until a deliberate backend migration (Convex) is scheduled.
+- **Data**: Existing orders after the feature ships must either **gain nullable snapshot fields** with sensible handling for legacy rows, or a documented **migration** strategy — implementation detail for the phase plan.
+- **Platform**: Primary target remains **Android** as today; iOS parity not stated as a blocker for v1.
+<!-- gsd-project-end -->
+
+<!-- gsd-stack-start source:codebase/STACK.md -->
+## Technology Stack
+
+## Monorepo & tooling
+- **Package manager:** `pnpm@10.30.3` (see root `package.json`).
+- **Monorepo:** [Nx](https://nx.dev) `22.5.3` — `nx.json`, plugins `@nx/react-native`, `@nx/vite`, `@nx/web`, `@nx/js`, `@nx/node`.
+- **Node:** `>= 22.11.0` (`engines` in root `package.json`).
+## Languages & runtime
+- **TypeScript** `~5.9.2` — shared `tsconfig.base.json` at repo root.
+- **React** `19.2.3` (pinned via `pnpm.overrides` in root `package.json`).
+- **React Native** `^0.84.1` — primary app in `apps/MOBILE/`.
+- **Hermes:** `hermes-compiler` listed in `apps/MOBILE/package.json`.
+## Mobile app (`apps/MOBILE`)
+- **UI:** NativeWind `^4.2.3` + Tailwind `^3.4.19` (app devDependency; root overrides align `nativewind` with Tailwind 3.4.x).
+- **Styling entry:** `apps/MOBILE/global.css`, wired via `nativewind/babel` and `withNativeWind` in `apps/MOBILE/metro.config.js`.
+- **Navigation:** `@react-navigation/native`, native-stack, bottom-tabs (`apps/MOBILE/navigation/index.tsx`).
+- **State:** `@reduxjs/toolkit`, `react-redux`, `redux-persist` + `redux-persist-transform-encrypt`, `@react-native-async-storage/async-storage` (`apps/MOBILE/store/index.ts`).
+- **Local database:** `realm` `^12.14.1` — schema and singleton in `apps/MOBILE/backend/realm.ts`.
+- **Animation / gestures:** `react-native-reanimated`, `react-native-gesture-handler`, `react-native-worklets`.
+- **Icons:** `lucide-react-native`.
+- **SVG:** `react-native-svg` + `react-native-svg-transformer` (Metro in `apps/MOBILE/metro.config.js`).
+- **Env in app code:** `react-native-dotenv` → `@env` module (`apps/MOBILE/babel.config.js`, `apps/MOBILE/utils/constants/env.ts`).
+## Shared library
+- **`libs/design-tokens`** — CSS variable maps for light/dark (`libs/design-tokens/src/index.ts`), consumed as path alias `design-tokens` from `tsconfig.base.json`.
+## Build & bundling
+- **Metro:** `apps/MOBILE/metro.config.js` — `@nx/react-native` `withNxMetro`, SVG transformer, NativeWind.
+- **Babel:** `apps/MOBILE/babel.config.js` — module-resolver aliases `@mobile` / `@`, Reanimated plugin (must stay last), conditional presets for Nx build vs RN dev.
+- **Android:** Gradle under `apps/MOBILE/android/`; Nx targets in `apps/MOBILE/project.json` (`android-build-debug`, `android-build-release`, install/clean/adb helpers).
+## Lint & format
+- **ESLint 9** flat config: `eslint.config.mjs` — `typescript-eslint`, `eslint-plugin-react`, `eslint-plugin-react-hooks`, `eslint-config-prettier`.
+- **Prettier** `~3.6.2` + `prettier-plugin-tailwindcss`.
+- **Git hooks:** Husky `^9.1.7`, `lint-staged` in root `package.json` (`.husky/pre-commit` runs `pnpm exec lint-staged`).
+## Optional / scaffolded but light use
+- Root devDependencies include **Vite** `^7`, **Vitest** `^4`, `@nx/vite` — Nx plugin registered in `nx.json`; no app-level Vitest config or `*.spec.ts` files were found in the mapped tree. Treat as available for future web/libs testing, not currently driving the MOBILE app.
+## Path aliases
+- TypeScript: `@mobile/*` → `apps/MOBILE/*`, `design-tokens` → `libs/design-tokens/src/index.ts` (`tsconfig.base.json`).
+- Babel (MOBILE): `@mobile` and `@` resolve to `apps/MOBILE` root (`apps/MOBILE/babel.config.js`).
+<!-- gsd-stack-end -->
+
+<!-- gsd-conventions-start source:CONVENTIONS.md -->
+## Conventions
+
+## TypeScript
+- **Strict-ish defaults** via `typescript-eslint` recommended rules in `eslint.config.mjs`.
+- **`any`:** warned (`@typescript-eslint/no-explicit-any`: `warn`).
+- **Unused symbols:** error; ignore names matching `^_` for args/vars; `caughtErrors: 'none'` so unused catch bindings are allowed.
+- **Shared config:** `tsconfig.base.json` — `target` es2015, `module` esnext, `skipLibCheck`, path aliases for `@mobile` and `design-tokens`.
+## React & React Native
+- **JSX runtime:** automatic (no `React` import required for JSX in modern setup).
+- **ESLint:** `react/react-in-jsx-scope` off; React version `detect`.
+- **Hooks rules:** `react-hooks/refs` off (Animated / RN patterns).
+- **`react-hooks/set-state-in-effect`:** off — documented in `eslint.config.mjs` as intentional for modal reset patterns.
+- **File-level exception:** `apps/MOBILE/components/Logo.tsx` allows `@typescript-eslint/no-require-imports` off (asset `require`).
+## Formatting
+- **Prettier** is the formatter of record; **`eslint-config-prettier`** disables conflicting ESLint rules.
+- **`lint-staged`** runs ESLint `--fix` and Prettier on staged `ts/tsx/js/jsx` and Prettier on json/md/css/yaml (`package.json`).
+## Imports & aliases
+- Prefer **`@mobile/...`** for cross-folder imports inside the app (matches TS paths).
+- **`@/`** is an alternate alias to the MOBILE app root in Babel; some screens use it (e.g. `HomeScreen.tsx` imports `@/components/ui`).
+- **Env:** only `ENV` object from `apps/MOBILE/utils/constants/env.ts`; raw `@env` imports are centralized there.
+## State management
+- **Redux Toolkit** — `configureStore`, `combineReducers` in `apps/MOBILE/store/index.ts`.
+- **Persistence:** `redux-persist` with `whitelist` to limit what is stored; encryption transform applied to the persisted subtree.
+- **Serializable check:** ignores standard persist action types; comment notes `immutableCheck` was disabled to avoid TS/process issues.
+## Backend / Realm
+- **Writes** wrapped in `realm.write(() => { ... })` inside services.
+- **Errors:** `throw new Error(...)` for missing entities (e.g. `UserService.updateUser`).
+- **Queries:** Realm `filtered`, `sorted`, cursor pagination by `createdAt` where applicable (`apps/MOBILE/backend/services/UserService.ts` as reference).
+- **UI boundary:** expose **plain objects** via `realmHelpers.ts` (`PlainUser`, `toPlainUser`, etc.) rather than passing live Realm objects to React.
+## Styling
+- **NativeWind:** `className` on RN primitives; semantic tokens like `bg-background`, `text-secondary` tied to CSS variables / theme.
+- **Components:** UI kit in `apps/MOBILE/components/ui/` uses variant props (e.g. `Text` `variant="headlineSmall"`).
+## Documentation
+- Internal doc example: `apps/MOBILE/docs/navigation-setup.md` for navigation conventions (screen name constants, etc.).
+<!-- gsd-conventions-end -->
+
+<!-- gsd-architecture-start source:ARCHITECTURE.md -->
+## Architecture
+
+## High-level pattern
+## Data flow (simplified)
+```mermaid
+```
+- **Reads/writes to business entities** (users, orders, invoices) go through services that call `getRealm()` and return **plain objects** via `toPlainUser` / similar helpers.
+- **Theme and ephemeral UI state** can use hooks and Redux; persisted Redux uses encrypt + AsyncStorage.
+## Entry points
+| Role             | File                               |
+| ---------------- | ---------------------------------- |
+| RN registration  | `apps/MOBILE/src/main.tsx`         |
+| App shell        | `apps/MOBILE/src/app/App.tsx`      |
+| Navigation graph | `apps/MOBILE/navigation/index.tsx` |
+| Realm bootstrap  | `apps/MOBILE/backend/realm.ts`     |
+| Redux store      | `apps/MOBILE/store/index.ts`       |
+## Abstractions
+- **Path aliases:** `@mobile/...` for app-internal imports; `@/` also maps to app root in Babel (`apps/MOBILE/babel.config.js`).
+- **Typing for navigation:** `RootStackParamList`, `BottomTabParamList` in `apps/MOBILE/utils/types/` (navigation types).
+- **Theming:** NativeWind `useColorScheme` + shared constants in `apps/MOBILE/utils/constants/`; design tokens package for CSS variables (`libs/design-tokens`).
+## Nx integration
+- Custom **run-commands** targets for Android lifecycle live in `apps/MOBILE/project.json`.
+- Metro uses `withNxMetro` from `@nx/react-native` (`apps/MOBILE/metro.config.js`) so the app participates in the workspace graph.
+## Design notes
+- Tab labels mix English and Arabic strings (`apps/MOBILE/navigation/index.tsx`), indicating a localized or bilingual product direction.
+- **Singleton services** (`UserService.getInstance()`, etc.) provide a simple service-locator style without a DI container.
+<!-- gsd-architecture-end -->
+
+<!-- gsd-workflow-start source:GSD defaults -->
+## GSD Workflow Enforcement
+
+Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
+
+Use these entry points:
+- `/gsd-quick` for small fixes, doc updates, and ad-hoc tasks
+- `/gsd-debug` for investigation and bug fixing
+- `/gsd-execute-phase` for planned phase work
+
+Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
+<!-- gsd-workflow-end -->
+
+
+
+<!-- gsd-profile-start -->
+## Developer Profile
+
+> Profile not yet configured. Run `/gsd-profile-user` to generate your developer profile.
+> This section is managed by `generate-claude-profile` -- do not edit manually.
+<!-- gsd-profile-end -->

@@ -3,6 +3,8 @@ import { getRealm } from '../realm';
 import { Order } from '../models/Order';
 import { User } from '../models/User';
 import { toPlainOrder, PlainOrder } from '../realmHelpers';
+import { roundHalfUp } from '@mobile/utils/money';
+import { orgSettingsService } from './OrgSettingsService';
 
 class OrderService {
   private static instance: OrderService;
@@ -14,6 +16,19 @@ class OrderService {
       OrderService.instance = new OrderService();
     }
     return OrderService.instance;
+  }
+
+  private assertSnapshotsUnchanged(
+    order: Order,
+    priorSnapshotPrice: number,
+    priorSnapshotTotal: number,
+  ): void {
+    if (
+      order.snapshotPricePerKg !== priorSnapshotPrice ||
+      order.snapshotTotal !== priorSnapshotTotal
+    ) {
+      throw new Error('Order price snapshots must not change after creation');
+    }
   }
 
   getOrders(
@@ -70,6 +85,10 @@ class OrderService {
       throw new Error(`User with id ${data.userId} not found`);
     }
 
+    const pricePerKg = orgSettingsService.getGlobalPricePerKg();
+    const rawTotal = data.flourAmount * pricePerKg;
+    const snapshotTotal = roundHalfUp(rawTotal, 2);
+
     let order!: Order;
 
     realm.write(() => {
@@ -80,6 +99,8 @@ class OrderService {
         month: data.month,
         year: data.year,
         flourAmount: data.flourAmount,
+        snapshotPricePerKg: pricePerKg,
+        snapshotTotal,
         user: user,
       });
     });
@@ -136,6 +157,9 @@ class OrderService {
       throw new Error(`Order with id ${objectId.toHexString()} not found`);
     }
 
+    const priorSnapshotPrice = order.snapshotPricePerKg;
+    const priorSnapshotTotal = order.snapshotTotal;
+
     realm.write(() => {
       const wasDone = !!order.doneAt;
 
@@ -152,6 +176,12 @@ class OrderService {
           order.user.flourAmount -= order.flourAmount;
         }
       }
+
+      this.assertSnapshotsUnchanged(
+        order,
+        priorSnapshotPrice,
+        priorSnapshotTotal,
+      );
     });
 
     return toPlainOrder(order);
@@ -171,11 +201,20 @@ class OrderService {
       throw new Error(`Order with id ${objectId.toHexString()} not found`);
     }
 
+    const priorSnapshotPrice = order.snapshotPricePerKg;
+    const priorSnapshotTotal = order.snapshotTotal;
+
     realm.write(() => {
       // If the order was done, refund the flour back to the user's balance
       if (order.doneAt && order.user && order.user.isValid()) {
         order.user.flourAmount += order.flourAmount;
       }
+
+      this.assertSnapshotsUnchanged(
+        order,
+        priorSnapshotPrice,
+        priorSnapshotTotal,
+      );
 
       // Finally, delete the order
       realm.delete(order);

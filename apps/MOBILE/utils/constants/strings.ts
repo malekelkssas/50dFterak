@@ -48,3 +48,45 @@ export const CUSTOMER_TABS = {
   ORDERS: 'orders',
   CUSTOMERS: 'customers',
 } as const;
+
+/** Bilingual pricing UI copy — EN matches 02-UI-SPEC canonical strings. */
+export const PRICING_STRINGS = {
+  en: {
+    primaryCta: 'Save flour price',
+    emptyHeading: 'Set your flour price',
+    emptyBody:
+      'Enter what you charge per kilogram. New orders will use this rate when they are created.',
+    invalidPriceTitle: 'Enter a valid price per kilogram',
+    invalidPriceBody:
+      'Use a positive number. You can use up to two decimal places.',
+    saveFailedTitle: 'Could not save price',
+    saveFailedBody: 'Check that the app has storage access and try again.',
+    screenTitle: 'Flour price per kg',
+    rateLabel: 'Price per kilogram',
+  },
+  ar: {
+    primaryCta: 'حفظ سعر الدقيق',
+    emptyHeading: 'حدد سعر الدقيق',
+    emptyBody:
+      'أدخل ما تتقاضاه لكل كيلو. الطلبات الجديدة ستستخدم هذا السعر عند إنشائها.',
+    invalidPriceTitle: 'أدخل سعراً صحيحاً للكيلو',
+    invalidPriceBody:
+      'استخدم رقماً موجباً. يمكنك استخدام رقمين عشريين كحد أقصى.',
+    saveFailedTitle: 'تعذر حفظ السعر',
+    saveFailedBody: 'تأكد من وصول التطبيق للتخزين ثم أعد المحاولة.',
+    screenTitle: 'سعر الدقيق للكيلو',
+    rateLabel: 'السعر لكل كيلو',
+  },
+} as const;
+
+/** Order row snapshot money labels (list + detail via OrderCard). */
+export const ORDER_MONEY_STRINGS = {
+  en: {
+    snapshotTotalLabel: 'Total',
+    snapshotRateLabel: 'Per kg',
+  },
+  ar: {
+    snapshotTotalLabel: 'الإجمالي',
+    snapshotRateLabel: 'للكيلو',
+  },
+} as const;
