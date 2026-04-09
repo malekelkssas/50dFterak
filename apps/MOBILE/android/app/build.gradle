@@ -116,3 +116,14 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+// RN CMake autolinking: `externalNativeBuildClean*` re-runs CMake after `clean` has already removed
+// library codegen jni dirs, so `add_subdirectory(.../codegen/jni)` fails. Disable these tasks; remove
+// `app/.cxx` (see `android-clean` in project.json) when you need a full native build reset.
+afterEvaluate {
+    tasks.configureEach { task ->
+        if (task.name.startsWith("externalNativeBuildClean")) {
+            task.enabled = false
+        }
+    }
+}

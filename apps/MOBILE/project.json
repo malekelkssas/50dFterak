@@ -9,8 +9,9 @@
     "android-clean": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "./gradlew clean",
-        "cwd": "apps/MOBILE/android"
+        "cwd": "apps/MOBILE/android",
+        "parallel": false,
+        "commands": ["rm -rf app/.cxx app/build build", "./gradlew clean"]
       }
     },
     "android-build-debug": {

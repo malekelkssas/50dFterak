@@ -4,6 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "prepare": "husky",
+    "lint": "eslint \"apps/**/*.{ts,tsx,js,jsx}\" \"libs/**/*.{ts,tsx,js,jsx}\"",
+    "lint:fix": "eslint \"apps/**/*.{ts,tsx,js,jsx}\" \"libs/**/*.{ts,tsx,js,jsx}\" --fix",
+    "lint:strict": "eslint \"apps/**/*.{ts,tsx,js,jsx}\" \"libs/**/*.{ts,tsx,js,jsx}\" --max-warnings=0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "android:clean": "nx run MOBILE:android-clean",
     "android:build-debug": "nx run MOBILE:android-build-debug",
     "android:build-release": "nx run MOBILE:android-build-release",
@@ -20,6 +26,7 @@
     "@babel/core": "^7.14.5",
     "@babel/preset-react": "^7.14.5",
     "@babel/runtime": "~7.27.6",
+    "@eslint/js": "^9.39.4",
     "@nx/js": "22.5.3",
     "@nx/node": "^22.5.3",
     "@nx/react": "^22.5.3",
@@ -40,12 +47,19 @@
     "@vitejs/plugin-react": "^4.2.0",
     "@vitest/ui": "^4.0.0",
     "babel-plugin-module-resolver": "^5.0.2",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "globals": "^17.4.0",
+    "husky": "^9.1.7",
     "jiti": "2.4.2",
     "jsdom": "~22.1.0",
+    "lint-staged": "^16.4.0",
     "metro-resolver": "~0.83.5",
     "nx": "22.5.3",
     "prettier": "~3.6.2",
-    "prettier-plugin-tailwindcss": "^0.7.2",
+    "prettier-plugin-tailwindcss": "0.6.14",
     "react-native-svg": "^15.15.4",
     "react-native-svg-transformer": "^1.5.1",
     "react-native-svg-web": "^1.0.9",
@@ -53,13 +67,16 @@
     "tailwindcss": "^4.2.1",
     "tslib": "^2.3.0",
     "typescript": "~5.9.2",
+    "typescript-eslint": "^8.58.1",
     "vite": "^7.0.0",
     "vitest": "^4.0.0"
   },
   "nx": {},
   "pnpm": {
     "overrides": {
-      "nativewind>tailwindcss": "3.4.19"
+      "nativewind>tailwindcss": "3.4.19",
+      "react": "19.2.3",
+      "react-dom": "19.2.3"
     },
     "packageExtensions": {
       "nativewind@*": {
@@ -70,10 +87,19 @@
     }
   },
   "dependencies": {
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react": "19.2.3",
+    "react-dom": "19.2.3"
   },
   "engines": {
     "node": ">= 22.11.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,mjs,cjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }

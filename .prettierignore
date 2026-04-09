@@ -3,3 +3,6 @@
 /coverage
 /.nx/cache
 /.nx/workspace-data
+apps/MOBILE/android
+apps/MOBILE/ios
+pnpm-lock.yaml
