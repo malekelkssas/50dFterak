@@ -20,6 +20,8 @@ A **React Native** bakery **management** app for a single operator (your friend)
 - ✓ **Bilingual UI direction** (English / Arabic labels in navigation) — existing
 - ✓ **Global per-kg price (data layer)** — `OrgSettings` singleton + `OrgSettingsService` read/write — **Validated in Phase 1: Pricing & snapshots (data layer)**
 - ✓ **Snapshot on order create** — `snapshotPricePerKg` and rounded `snapshotTotal` on `Order` at creation; guards prevent later mutation — **Validated in Phase 1: Pricing & snapshots (data layer)**
+- ✓ **Operator global per-kg price UI** — View/edit persisted global rate without creating an order — **Validated in Phase 2: Operator UI**
+- ✓ **Order list/detail snapshot money** — Display `snapshotTotal` / `snapshotPricePerKg` with stable formatting (not live global recompute) — **Validated in Phase 2: Operator UI**
 
 ### Active
 
@@ -35,7 +37,7 @@ A **React Native** bakery **management** app for a single operator (your friend)
 
 - Monorepo **Fterak50d** (`pnpm`, Nx); mobile app **`apps/MOBILE`**.
 - Codebase map under `.planning/codebase/` (stack, architecture, structure).
-- Orders store **`flourAmount`** plus **`snapshotPricePerKg`** and **`snapshotTotal`** (Realm v4). Operator UI to view/edit global price and show snapshot money is **Phase 2**.
+- Orders store **`flourAmount`** plus **`snapshotPricePerKg`** and **`snapshotTotal`** (Realm v4). Operator UI for global price and snapshot money on orders shipped in **Phase 2**; next focus is **Phase 3** release discipline (semver + tags).
 
 ## Constraints
 
@@ -72,4 +74,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-_Last updated: 2026-04-09 — Phase 1 (pricing snapshots data layer) complete_
+_Last updated: 2026-04-09 — Phase 2 (operator UI) complete; Phase 3 (release discipline) next_

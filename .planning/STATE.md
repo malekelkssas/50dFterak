@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: verifying
-stopped_at: Phase 2 context gathered
-last_updated: '2026-04-09T12:42:00.491Z'
+status: planning
+stopped_at: Phase 2 complete — ready for Phase 3
+last_updated: '2026-04-09T14:35:00.000Z'
 last_activity: 2026-04-09
 progress:
   total_phases: 3
-  completed_phases: 1
-  total_plans: 3
-  completed_plans: 3
-  percent: 33
+  completed_phases: 2
+  total_plans: 7
+  completed_plans: 5
+  percent: 71
 ---
 
 # Project State
@@ -22,34 +22,35 @@ See: .planning/PROJECT.md (updated 2026-04-09)
 
 **Core value:** Reliable day-to-day bakery operations on the phone, including money clarity via immutable per-order pricing snapshots.
 
-**Current focus:** Phase 2 — Operator UI (pricing screens + snapshot money display)
+**Current focus:** Phase 3 — Release discipline (semver + tagging)
 
 ## Current Position
 
-Phase: 2 of 3 (Operator UI)  
+Phase: 3 of 3 (release discipline)  
 Plan: not started  
-Status: Phase 1 verified and complete  
+Status: Phase 2 verified and complete  
 Last activity: 2026-04-09
 
-Progress: [███░░░░░░░] 33%
+Progress: [███████░░░] 71%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 3 (Phase 1)
-- Average duration: ~10 min/plan
-- Total execution time: ~30 min (Phase 1)
+- Total plans completed: 5 (Phases 1–2)
+- Average duration: ~12 min/plan
+- Total execution time: ~60 min (Phases 1–2)
 
 **By Phase:**
 
 | Phase | Plans | Completed | Avg/Plan |
 | ----- | ----- | --------- | -------- |
 | 1     | 3     | 3         | ~10 min  |
+| 2     | 2     | 2         | ~20 min  |
 
 **Recent Trend:**
 
-- Last 3 plans: 01-01, 01-02, 01-03 (pricing snapshots data layer)
+- Last plans: 02-01, 02-02 (operator UI — global price + snapshot money on orders)
 - Trend: complete
 
 _Updated after each plan completion_
@@ -73,6 +74,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-09T12:42:00.486Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-operator-ui/02-CONTEXT.md
+Last session: 2026-04-09T14:35:00.000Z
+Stopped at: Phase 2 execution and verification complete
+Resume file: .planning/ROADMAP.md (Phase 3 — release discipline)
