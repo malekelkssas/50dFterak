@@ -3,6 +3,7 @@ import { getRealm } from '../realm';
 import { Order } from '../models/Order';
 import { User } from '../models/User';
 import { toPlainOrder, PlainOrder } from '../realmHelpers';
+import { roundHalfUp } from '@mobile/utils/money';
 import { orgSettingsService } from './OrgSettingsService';
 
 class OrderService {
@@ -86,8 +87,7 @@ class OrderService {
 
     const pricePerKg = orgSettingsService.getGlobalPricePerKg();
     const rawTotal = data.flourAmount * pricePerKg;
-    // Half-up rounding to 2 decimal places
-    const snapshotTotal = Math.round(rawTotal * 100) / 100;
+    const snapshotTotal = roundHalfUp(rawTotal, 2);
 
     let order!: Order;
 
