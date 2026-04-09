@@ -60,7 +60,7 @@ export function EditInvoiceModal({
       const data: InvoiceUpdateData = {
         title: title.trim(),
         price: parsedPrice,
-        description: description.trim(),
+        description: description.trim() || undefined,
         quantity: isNaN(parsedQuantity) ? 1 : parsedQuantity,
       };
 

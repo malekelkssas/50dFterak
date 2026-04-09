@@ -134,7 +134,8 @@ class InvoiceService {
       if (data.title !== undefined) {
         invoice.title = data.title;
       }
-      if (data.description !== undefined) {
+      // Use `in` so clearing with `undefined` (empty optional) works; `!== undefined` would skip that.
+      if ('description' in data) {
         invoice.description = data.description;
       }
       if (data.price !== undefined) {

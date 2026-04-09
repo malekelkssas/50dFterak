@@ -142,13 +142,15 @@ class OrderService {
       // Toggle the status
       order.doneAt = wasDone ? null : new Date();
 
-      // Update the user's flour balance
-      if (wasDone) {
-        // Changing from done -> pending: refund the balance
-        order.user.flourAmount += order.flourAmount;
-      } else {
-        // Changing from pending -> done: deduct the balance
-        order.user.flourAmount -= order.flourAmount;
+      // Update the user's flour balance (same guard as deleteOrder — user may be invalid if deleted)
+      if (order.user && order.user.isValid()) {
+        if (wasDone) {
+          // Changing from done -> pending: refund the balance
+          order.user.flourAmount += order.flourAmount;
+        } else {
+          // Changing from pending -> done: deduct the balance
+          order.user.flourAmount -= order.flourAmount;
+        }
       }
     });
 
