@@ -3,6 +3,10 @@ import react from '@vitejs/plugin-react';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import * as esbuild from 'esbuild';
 import { readFileSync } from 'fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const mobileRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const extensions = [
   '.mjs',
@@ -37,6 +41,8 @@ export default defineConfig({
   resolve: {
     extensions,
     alias: {
+      '@mobile': mobileRoot,
+      '@': mobileRoot,
       'react-native': 'react-native-web',
       'react-native-svg': 'react-native-svg-web',
       '@react-native/assets-registry/registry':

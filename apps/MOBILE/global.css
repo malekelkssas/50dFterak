@@ -1,3 +1,32 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --color-background: 255 255 255;
+    --color-foreground: 10 10 10;
+    --color-primary: 59 130 246;
+    --color-secondary: 100 116 139;
+    --color-muted: 241 245 249;
+    --color-accent: 99 102 241;
+    /* Semantic tokens used across components (shadcn-style names, Tailwind v3–friendly) */
+    --color-border: 226 232 240;
+    --color-surface: 248 250 252;
+    --color-muted-foreground: 100 116 139;
+    --color-primary-on: 255 255 255;
+  }
+
+  .dark {
+    --color-background: 10 10 10;
+    --color-foreground: 245 245 245;
+    --color-primary: 96 165 250;
+    --color-secondary: 148 163 184;
+    --color-muted: 30 41 59;
+    --color-accent: 129 140 248;
+    --color-border: 51 65 85;
+    --color-surface: 24 24 27;
+    --color-muted-foreground: 148 163 184;
+    --color-primary-on: 255 255 255;
+  }
+}

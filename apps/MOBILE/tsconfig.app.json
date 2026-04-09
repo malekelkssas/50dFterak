@@ -7,20 +7,16 @@
   ],
   "compilerOptions": {
     "outDir": "../../dist/out-tsc",
-    "types": [
-      "node"
-    ],
+    "moduleResolution": "bundler",
+    "types": ["node"],
     "composite": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@mobile/*": ["./*"],
+      "@/*": ["./*"]
     }
   },
-  "files": [
-    "../../node_modules/@nx/react-native/typings/svg.d.ts"
-  ],
+  "files": ["../../node_modules/@nx/react-native/typings/svg.d.ts"],
   "exclude": [
     "src/**/*.test.ts",
     "src/**/*.spec.ts",
@@ -37,6 +33,18 @@
     "src/**/*.tsx",
     "src/**/*.js",
     "src/**/*.jsx",
+    "components/**/*.ts",
+    "components/**/*.tsx",
+    "utils/**/*.ts",
+    "utils/**/*.tsx",
+    "hooks/**/*.ts",
+    "hooks/**/*.tsx",
+    "backend/**/*.ts",
+    "store/**/*.ts",
+    "screens/**/*.tsx",
+    "navigation/**/*.tsx",
+    "types/**/*.ts",
+    "types/**/*.d.ts",
     "nativewind-env.d.ts"
   ]
 }

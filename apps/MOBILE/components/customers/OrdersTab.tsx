@@ -1,0 +1,255 @@
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { View, FlatList } from 'react-native';
+import { Text, ActivityIndicator, Snackbar } from '@mobile/components/ui';
+import {
+  WeeklyCalendar,
+  getWeekStart,
+} from '@mobile/components/customers/WeeklyCalendar';
+import { orderService } from '@mobile/backend/services/OrderService';
+import type { PlainOrder } from '@mobile/backend/realmHelpers';
+import { CUSTOMERS_STRINGS } from '@mobile/utils/constants';
+import { ShoppingBag } from 'lucide-react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { OrderCard } from '@mobile/components/customers/OrderCard';
+
+const PAGE_SIZE = 20;
+
+export function OrdersTab() {
+  // Calendar State
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [weekStartDate, setWeekStartDate] = useState<Date>(
+    getWeekStart(new Date()),
+  );
+  const [orderDays, setOrderDays] = useState<
+    { day: number; month: number; year: number }[]
+  >([]);
+
+  // Orders State — plain JS snapshots, disconnected from Realm
+  const [orders, setOrders] = useState<PlainOrder[]>([]);
+  const [nextCursor, setNextCursor] = useState<Date | null>(null);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+
+  const flatListRef = useRef<FlatList>(null);
+
+  const isFetchingMoreRef = useRef(false);
+  const fetchIdRef = useRef(0);
+  const hasMountedRef = useRef(false);
+
+  // Keep track of the latest callbacks and state to avoid stale closures in useFocusEffect
+  const latestStateRef = useRef({
+    loadWeekOrderDays: (_date: Date) => {},
+    loadInitialOrders: () => {},
+    weekStartDate,
+  });
+
+  // Fetch the pending order dots for the current week
+  const loadWeekOrderDays = useCallback((date: Date) => {
+    try {
+      const days = orderService.getOrderDaysInWeek(date);
+      setOrderDays(days);
+    } catch (error) {
+      console.error('Failed to load order days', error);
+    }
+  }, []);
+
+  // Load orders for the selected date
+  const loadInitialOrders = useCallback(() => {
+    fetchIdRef.current += 1;
+    isFetchingMoreRef.current = false;
+
+    setIsLoadingOrders(true);
+    setIsFetchingMore(false);
+    try {
+      const { orders: fetchedOrders, nextCursor: cursor } =
+        orderService.getOrders(
+          selectedDate.getFullYear(),
+          selectedDate.getMonth() + 1,
+          selectedDate.getDate(),
+          undefined,
+          PAGE_SIZE,
+        );
+      setOrders(fetchedOrders);
+      setNextCursor(cursor);
+    } catch (error) {
+      setSnackbarMessage('فشل تحميل الطلبات');
+    } finally {
+      setIsLoadingOrders(false);
+
+      // Auto-scroll to top when reloading initial orders (e.g. on focus or date change)
+      if (flatListRef.current) {
+        flatListRef.current.scrollToOffset({ offset: 0, animated: false });
+      }
+    }
+  }, [selectedDate]);
+
+  // Handle initial mount and date changes
+  useEffect(() => {
+    loadWeekOrderDays(weekStartDate);
+  }, [weekStartDate, loadWeekOrderDays]);
+
+  useEffect(() => {
+    loadInitialOrders();
+  }, [selectedDate, loadInitialOrders]);
+
+  useEffect(() => {
+    latestStateRef.current = {
+      loadWeekOrderDays,
+      loadInitialOrders,
+      weekStartDate,
+    };
+  }, [loadWeekOrderDays, loadInitialOrders, weekStartDate]);
+
+  // Refresh when screen gains focus (e.g. returning from UserDetailsScreen)
+  useFocusEffect(
+    useCallback(() => {
+      if (!hasMountedRef.current) {
+        hasMountedRef.current = true;
+        return;
+      }
+
+      // Use the ref to access the latest callbacks and state, avoiding stale closures
+      // without needing to put them in the dependency array (which would cause double fetches)
+      const {
+        loadWeekOrderDays: currentLoadWeekOrderDays,
+        loadInitialOrders: currentLoadInitialOrders,
+        weekStartDate: currentWeekStartDate,
+      } = latestStateRef.current;
+      currentLoadWeekOrderDays(currentWeekStartDate);
+      currentLoadInitialOrders();
+    }, []),
+  );
+
+  const loadMoreOrders = useCallback(() => {
+    if (!nextCursor || isFetchingMoreRef.current || isLoadingOrders) return;
+
+    isFetchingMoreRef.current = true;
+    setIsFetchingMore(true);
+
+    const capturedFetchId = fetchIdRef.current;
+    setTimeout(() => {
+      try {
+        const { orders: fetchedOrders, nextCursor: cursor } =
+          orderService.getOrders(
+            selectedDate.getFullYear(),
+            selectedDate.getMonth() + 1,
+            selectedDate.getDate(),
+            nextCursor,
+            PAGE_SIZE,
+          );
+
+        if (capturedFetchId !== fetchIdRef.current) {
+          isFetchingMoreRef.current = false;
+          setIsFetchingMore(false);
+          return;
+        }
+
+        setOrders((prev) => [...prev, ...fetchedOrders]);
+        setNextCursor(cursor);
+      } catch (error) {
+        setSnackbarMessage('فشل تحميل المزيد من الطلبات');
+      } finally {
+        isFetchingMoreRef.current = false;
+        setIsFetchingMore(false);
+      }
+    }, 500);
+  }, [nextCursor, isLoadingOrders, selectedDate]);
+
+  const handleToggleOrder = (orderId: string) => {
+    try {
+      orderService.toggleDone(orderId);
+      // Refresh week dots and re-fetch fresh snapshots
+      loadWeekOrderDays(weekStartDate);
+      loadInitialOrders();
+    } catch (error) {
+      setSnackbarMessage('فشل تحديث حالة الطلب');
+    }
+  };
+
+  const handleDeleteOrder = (orderId: string) => {
+    try {
+      orderService.deleteOrder(orderId);
+      loadWeekOrderDays(weekStartDate);
+      loadInitialOrders();
+      setSnackbarMessage('تم حذف الطلب بنجاح');
+    } catch (error) {
+      setSnackbarMessage('فشل حذف الطلب');
+    }
+  };
+
+  const renderOrderItem = useCallback(
+    ({ item }: { item: PlainOrder }) => {
+      return (
+        <OrderCard
+          item={item}
+          showUserInfo={true}
+          onToggleStatus={handleToggleOrder}
+          onDelete={handleDeleteOrder}
+        />
+      );
+    },
+    [handleToggleOrder, handleDeleteOrder],
+  );
+
+  const renderFooter = useCallback(() => {
+    if (!isFetchingMore) return null;
+    return (
+      <View className="h-20 items-center py-4">
+        <ActivityIndicator size="small" />
+      </View>
+    );
+  }, [isFetchingMore]);
+
+  const renderEmpty = useCallback(() => {
+    return (
+      <View className="items-center justify-center py-10">
+        <ShoppingBag size={48} color="#9ca3af" className="mb-4 opacity-50" />
+        <Text variant="bodyLarge" className="text-muted-foreground text-center">
+          {CUSTOMERS_STRINGS.ORDERS_EMPTY_STATE}
+        </Text>
+      </View>
+    );
+  }, []);
+
+  return (
+    <View className="bg-background flex-1">
+      <View className="bg-surface border-border z-10 border-b pt-4">
+        <WeeklyCalendar
+          selectedDate={selectedDate}
+          onDateChange={setSelectedDate}
+          weekStartDate={weekStartDate}
+          onWeekChange={setWeekStartDate}
+          orderDays={orderDays}
+        />
+      </View>
+
+      {isLoadingOrders ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" />
+        </View>
+      ) : (
+        <FlatList
+          ref={flatListRef}
+          data={orders}
+          keyExtractor={(item) => item._id}
+          renderItem={renderOrderItem}
+          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+          onEndReached={loadMoreOrders}
+          onEndReachedThreshold={0.5}
+          ListEmptyComponent={renderEmpty}
+          extraData={isFetchingMore}
+          ListFooterComponent={renderFooter}
+        />
+      )}
+
+      <Snackbar
+        visible={!!snackbarMessage}
+        onDismiss={() => setSnackbarMessage('')}
+        duration={3000}
+      >
+        {snackbarMessage}
+      </Snackbar>
+    </View>
+  );
+}

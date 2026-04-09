@@ -1,33 +1,54 @@
-import React from 'react';
-import { View, Text, StatusBar } from 'react-native';
+/**
+ * @format
+ */
 
-export const App = () => {
+import { StatusBar } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { useColorScheme } from 'nativewind';
+import { ThemeProvider } from '@mobile/components/ThemeProvider';
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+import { store, persistor } from '@mobile/store';
+import { AppNavigator } from '@mobile/navigation';
+import { statusBarColors, SCHEME_DARK } from '@mobile/utils/constants';
+import { PortalHost } from '@mobile/components/ui/Portal';
+
+function App() {
   return (
-    <View className="flex-1 items-center justify-center bg-slate-900">
-      <StatusBar barStyle="light-content" />
-
-      <View className="mb-8 rounded-2xl bg-slate-800 p-8 shadow-xl">
-        <Text className="text-center text-4xl font-extrabold tracking-tight text-white mb-2">
-          Tailwind is Working! 🎉
-        </Text>
-        <Text className="text-center text-lg font-medium text-slate-400">
-          Built with NativeWind v4 & Nx
-        </Text>
-      </View>
-
-      <View className="flex-row space-x-4 mt-6">
-        <View className="rounded-full bg-emerald-500/20 px-6 py-3 border border-emerald-500/30">
-          <Text className="font-semibold text-emerald-400">Fast</Text>
-        </View>
-        <View className="rounded-full bg-blue-500/20 px-6 py-3 border border-blue-500/30">
-          <Text className="font-semibold text-blue-400">Simple</Text>
-        </View>
-        <View className="rounded-full bg-purple-500/20 px-6 py-3 border border-purple-500/30">
-          <Text className="font-semibold text-purple-400">Beautiful</Text>
-        </View>
-      </View>
-    </View>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <SafeAreaProvider>
+          <ThemeProvider>
+            <PortalHost>
+              <AppShell />
+            </PortalHost>
+          </ThemeProvider>
+        </SafeAreaProvider>
+      </PersistGate>
+    </Provider>
   );
-};
+}
+
+function AppShell() {
+  const { colorScheme } = useColorScheme();
+  const isDarkMode = colorScheme === SCHEME_DARK;
+
+  return (
+    <>
+      <StatusBar
+        barStyle={isDarkMode ? 'dark-content' : 'light-content'}
+        backgroundColor={
+          isDarkMode ? statusBarColors.light : statusBarColors.dark
+        }
+      />
+      <SafeAreaView className="bg-background flex-1">
+        <NavigationContainer>
+          <AppNavigator />
+        </NavigationContainer>
+      </SafeAreaView>
+    </>
+  );
+}
 
 export default App;
