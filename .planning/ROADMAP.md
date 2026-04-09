@@ -6,7 +6,7 @@ Ship **trustworthy money fields** on top of the existing Realm order flow: persi
 
 ## Phases
 
-- [ ] **Phase 1: Pricing & snapshots (data layer)** — Realm settings + order snapshot fields, write rules, legacy policy
+- [x] **Phase 1: Pricing & snapshots (data layer)** — Realm settings + order snapshot fields, write rules, legacy policy (2026-04-09)
 - [ ] **Phase 2: Operator UI** — Screens to manage price and display order money from snapshots
 - [ ] **Phase 3: Release discipline** — Version bumps and tagging workflow
 
@@ -87,8 +87,8 @@ Plans:
 **Execution Order:**  
 Phases execute in numeric order: 1 → 2 → 3
 
-| Phase                               | Plans Complete | Status      | Completed |
-| ----------------------------------- | -------------- | ----------- | --------- |
-| 1. Pricing & snapshots (data layer) | 0/3            | Not started | -         |
-| 2. Operator UI                      | 0/2            | Not started | -         |
-| 3. Release discipline               | 0/2            | Not started | -         |
+| Phase                               | Plans Complete | Status      | Completed  |
+| ----------------------------------- | -------------- | ----------- | ---------- |
+| 1. Pricing & snapshots (data layer) | 3/3            | Complete    | 2026-04-09 |
+| 2. Operator UI                      | 0/2            | Not started | -          |
+| 3. Release discipline               | 0/2            | Not started | -          |
