@@ -18,11 +18,11 @@ A **React Native** bakery **management** app for a single operator (your friend)
 - ✓ **Redux + persistence** — app state layer — existing
 - ✓ **Android-focused RN app** in `apps/MOBILE` with NativeWind, React Navigation — existing
 - ✓ **Bilingual UI direction** (English / Arabic labels in navigation) — existing
+- ✓ **Global per-kg price (data layer)** — `OrgSettings` singleton + `OrgSettingsService` read/write — **Validated in Phase 1: Pricing & snapshots (data layer)**
+- ✓ **Snapshot on order create** — `snapshotPricePerKg` and rounded `snapshotTotal` on `Order` at creation; guards prevent later mutation — **Validated in Phase 1: Pricing & snapshots (data layer)**
 
 ### Active
 
-- [ ] **Global per-kg price** — Operator sets one **price per kilogram** for the bakery (not per product in v1).
-- [ ] **Snapshot on order create** — When an order is created, persist the **price per kg** (and derived **order total** or equivalent) so it **does not change** if the global price is updated later.
 - [ ] **Release discipline** — When a shippable feature is complete: bump **semver** on mobile app and root repo (`0.0.0` style), then **git tag** and push (process to follow consistently).
 
 ### Out of Scope
@@ -35,21 +35,21 @@ A **React Native** bakery **management** app for a single operator (your friend)
 
 - Monorepo **Fterak50d** (`pnpm`, Nx); mobile app **`apps/MOBILE`**.
 - Codebase map under `.planning/codebase/` (stack, architecture, structure).
-- Orders today store **`flourAmount`** (numeric) but **no monetary fields** yet; pricing work extends the **Order** (or related) model and UI.
+- Orders store **`flourAmount`** plus **`snapshotPricePerKg`** and **`snapshotTotal`** (Realm v4). Operator UI to view/edit global price and show snapshot money is **Phase 2**.
 
 ## Constraints
 
 - **Tech**: Stay on current stack (**Realm**, **Redux**, RN) until a deliberate backend migration (Convex) is scheduled.
-- **Data**: Existing orders after the feature ships must either **gain nullable snapshot fields** with sensible handling for legacy rows, or a documented **migration** strategy — implementation detail for the phase plan.
+- **Data**: Pre–schema-v4 orders use **0** for snapshot fields (documented under ORD-04 / D-05 in `01-LEGACY-ORDERS.md`).
 - **Platform**: Primary target remains **Android** as today; iOS parity not stated as a blocker for v1.
 
 ## Key Decisions
 
-| Decision                                | Rationale                                                     | Outcome   |
-| --------------------------------------- | ------------------------------------------------------------- | --------- |
-| **Single global per-kg price for v1**   | Simplest operator model; matches your choice “1”              | — Pending |
-| **Immutable order totals via snapshot** | Accounting trust; old orders must not move when price changes | — Pending |
-| **Convex**                              | You asked to ignore for now                                   | Deferred  |
+| Decision                                | Rationale                                                     | Outcome                                              |
+| --------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------------- |
+| **Single global per-kg price for v1**   | Simplest operator model; matches your choice “1”              | Phase 1 data layer shipped (`OrgSettings` + service) |
+| **Immutable order totals via snapshot** | Accounting trust; old orders must not move when price changes | Phase 1: snapshots on create + service guards        |
+| **Convex**                              | You asked to ignore for now                                   | Deferred                                             |
 
 ## Evolution
 
@@ -72,4 +72,4 @@ This document evolves at phase transitions and milestone boundaries.
 
 ---
 
-_Last updated: 2026-04-09 after initialization_
+_Last updated: 2026-04-09 — Phase 1 (pricing snapshots data layer) complete_

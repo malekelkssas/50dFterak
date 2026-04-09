@@ -9,14 +9,14 @@
 
 - [ ] **PRICE-01**: Operator can view the current **global price per kilogram** (single bakery-wide rate).
 - [ ] **PRICE-02**: Operator can **set or update** that global per-kilogram price without creating an order.
-- [ ] **PRICE-03**: Updating the global price **does not change** stored totals (or snapshot fields) on **existing** orders.
+- [x] **PRICE-03**: Updating the global price **does not change** stored totals (or snapshot fields) on **existing** orders.
 
 ### Orders & totals
 
-- [ ] **ORD-01**: When creating an order, the app **captures a snapshot** of the global per-kg price **in effect at creation time** (stored on the order or equivalent immutable record).
-- [ ] **ORD-02**: When creating an order, the app stores an **order total** (or equivalent) derived from **flour amount × snapped per-kg price**, so the total is stable for that order row.
+- [x] **ORD-01**: When creating an order, the app **captures a snapshot** of the global per-kg price **in effect at creation time** (stored on the order or equivalent immutable record).
+- [x] **ORD-02**: When creating an order, the app stores an **order total** (or equivalent) derived from **flour amount × snapped per-kg price**, so the total is stable for that order row.
 - [ ] **ORD-03**: Order list and detail views show **monetary values from the snapshot**, not a live recalculation from the current global price.
-- [ ] **ORD-04**: **Legacy orders** created before this feature either display a defined fallback (e.g. “—” or “unknown”) or receive a one-time migration rule — behavior is **explicit and documented** in the phase plan (no silent wrong totals).
+- [x] **ORD-04**: **Legacy orders** created before this feature either display a defined fallback (e.g. “—” or “unknown”) or receive a one-time migration rule — behavior is **explicit and documented** in the phase plan (no silent wrong totals).
 
 ### Release process
 
@@ -47,17 +47,17 @@
 
 Which phases cover which requirements. Updated during roadmap creation.
 
-| Requirement | Phase   | Status  |
-| ----------- | ------- | ------- |
-| PRICE-01    | Phase 2 | Pending |
-| PRICE-02    | Phase 2 | Pending |
-| PRICE-03    | Phase 1 | Pending |
-| ORD-01      | Phase 1 | Pending |
-| ORD-02      | Phase 1 | Pending |
-| ORD-03      | Phase 2 | Pending |
-| ORD-04      | Phase 1 | Pending |
-| REL-01      | Phase 3 | Pending |
-| REL-02      | Phase 3 | Pending |
+| Requirement | Phase   | Status   |
+| ----------- | ------- | -------- |
+| PRICE-01    | Phase 2 | Pending  |
+| PRICE-02    | Phase 2 | Pending  |
+| PRICE-03    | Phase 1 | Complete |
+| ORD-01      | Phase 1 | Complete |
+| ORD-02      | Phase 1 | Complete |
+| ORD-03      | Phase 2 | Pending  |
+| ORD-04      | Phase 1 | Complete |
+| REL-01      | Phase 3 | Pending  |
+| REL-02      | Phase 3 | Pending  |
 
 **Coverage:**
 

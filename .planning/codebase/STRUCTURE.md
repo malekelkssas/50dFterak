@@ -42,7 +42,7 @@
 
 - **Screens:** `*Screen.tsx` in `apps/MOBILE/screens/`.
 - **Services:** `*Service.ts`, singleton with `getInstance()` in `apps/MOBILE/backend/services/`.
-- **Realm models:** PascalCase class matching entity (`User`, `Order`, `Invoice`) in `apps/MOBILE/backend/models/`.
+- **Realm models:** PascalCase class matching entity (`User`, `Order`, `Invoice`, `OrgSettings`) in `apps/MOBILE/backend/models/`.
 - **UI components:** PascalCase files under `components/`.
 - **Redux slices:** `*Slice.ts` under `apps/MOBILE/store/slices/`.
 

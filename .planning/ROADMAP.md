@@ -33,9 +33,9 @@ Ship **trustworthy money fields** on top of the existing Realm order flow: persi
 
 Plans:
 
-- [ ] 01-01: Design Realm schema (settings + `Order` fields) and migration/version bump strategy
-- [ ] 01-02: Services: read/update global price; `addOrder` writes snapshots; guards against mutating snapshots
-- [ ] 01-03: Legacy order policy + tests or manual verification checklist
+- [x] 01-01: Design Realm schema (settings + `Order` fields) and migration/version bump strategy
+- [x] 01-02: Services: read/update global price; `addOrder` writes snapshots; guards against mutating snapshots
+- [x] 01-03: Legacy order policy + tests or manual verification checklist
 
 ### Phase 2: Operator UI
 
