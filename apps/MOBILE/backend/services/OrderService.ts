@@ -3,6 +3,7 @@ import { getRealm } from '../realm';
 import { Order } from '../models/Order';
 import { User } from '../models/User';
 import { toPlainOrder, PlainOrder } from '../realmHelpers';
+import { orgSettingsService } from './OrgSettingsService';
 
 class OrderService {
   private static instance: OrderService;
@@ -70,6 +71,11 @@ class OrderService {
       throw new Error(`User with id ${data.userId} not found`);
     }
 
+    const pricePerKg = orgSettingsService.getGlobalPricePerKg();
+    const rawTotal = data.flourAmount * pricePerKg;
+    // Half-up rounding to 2 decimal places
+    const snapshotTotal = Math.round(rawTotal * 100) / 100;
+
     let order!: Order;
 
     realm.write(() => {
@@ -80,6 +86,8 @@ class OrderService {
         month: data.month,
         year: data.year,
         flourAmount: data.flourAmount,
+        snapshotPricePerKg: pricePerKg,
+        snapshotTotal,
         user: user,
       });
     });
